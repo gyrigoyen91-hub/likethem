@@ -89,6 +89,46 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
     notFound()
   }
 
+  // Transform the data to match the expected Curator interface
+  const transformedCurator = {
+    id: curator.id,
+    storeName: curator.storeName,
+    bio: curator.bio || undefined,
+    bannerImage: curator.bannerImage || undefined,
+    instagram: curator.instagram || undefined,
+    tiktok: curator.tiktok || undefined,
+    youtube: curator.youtube || undefined,
+    twitter: curator.twitter || undefined,
+    isEditorsPick: curator.isEditorsPick,
+    slug: curator.slug,
+    user: {
+      id: curator.user.id,
+      fullName: curator.user.fullName || undefined,
+      avatar: curator.user.avatar || undefined
+    },
+    products: curator.products.map(product => ({
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      tags: product.tags,
+      sizes: product.sizes,
+      colors: product.colors,
+      stockQuantity: product.stockQuantity,
+      curatorNote: product.curatorNote || undefined,
+      slug: product.slug,
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
+      images: product.images.map(image => ({
+        id: image.id,
+        url: image.url,
+        altText: image.altText || undefined,
+        order: image.order
+      }))
+    }))
+  }
+
   const description = curator.bio || `Discover unique fashion curated by ${curator.storeName}`
   const imageUrl = curator.bannerImage || ''
 
@@ -101,7 +141,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
         slug={curator.slug}
       />
       
-      <CuratorDetailClient curator={curator} />
+      <CuratorDetailClient curator={transformedCurator} />
     </>
   )
 } 
