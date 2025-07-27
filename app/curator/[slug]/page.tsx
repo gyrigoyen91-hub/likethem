@@ -122,6 +122,9 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
 
   // Runtime check to verify transformedCurator is being used
   console.log("✅ USING transformedCurator", transformedCurator);
+  
+  // Detailed runtime inspection to confirm null to undefined conversion
+  console.log("✅ Final transformedCurator object", JSON.stringify(transformedCurator, null, 2));
 
   return (
     <>
