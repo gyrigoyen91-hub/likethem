@@ -146,6 +146,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
       {/* CRITICAL: Only transformedCurator should be passed, never the raw curator object */}
       {/* URGENT FIX: This line MUST use transformedCurator, not curator */}
       {/* CRITICAL: Never pass raw curator object - only use transformedCurator */}
+      {/* VERCEL FIX: This line MUST use transformedCurator, NOT curator */}
       <CuratorDetailClient curator={transformedCurator} />
     </>
   )
