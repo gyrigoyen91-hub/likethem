@@ -127,6 +127,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
         slug={curator.slug}
       />
       
+      {/* Use transformedCurator to ensure proper TypeScript compatibility */}
       <CuratorDetailClient curator={transformedCurator} />
     </>
   )
