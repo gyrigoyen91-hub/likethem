@@ -121,7 +121,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
   const imageUrl = curator.bannerImage || ''
 
   // Runtime check to verify transformedCurator is being used
-  console.log("USING transformedCurator ✅", transformedCurator);
+  console.log("✅ USING transformedCurator", transformedCurator);
 
   return (
     <>
