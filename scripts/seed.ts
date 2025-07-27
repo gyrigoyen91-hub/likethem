@@ -30,6 +30,7 @@ async function main() {
     create: {
       userId: user.id,
       storeName: 'Test Store',
+      slug: 'test-store',
       bio: 'A test store for demonstrating the search functionality',
       isPublic: true
     }
@@ -47,7 +48,8 @@ async function main() {
       colors: 'Gold',
       stockQuantity: 1,
       isActive: true,
-      curatorId: curator.id
+      curatorId: curator.id,
+      slug: 'young-money-rolex'
     },
     {
       title: 'Leather Trench Coat',
@@ -59,7 +61,8 @@ async function main() {
       colors: 'Brown,Black',
       stockQuantity: 5,
       isActive: true,
-      curatorId: curator.id
+      curatorId: curator.id,
+      slug: 'leather-trench-coat'
     },
     {
       title: 'Minimalist White Sneakers',
@@ -71,7 +74,8 @@ async function main() {
       colors: 'White',
       stockQuantity: 10,
       isActive: true,
-      curatorId: curator.id
+      curatorId: curator.id,
+      slug: 'minimalist-white-sneakers'
     }
   ]
 
