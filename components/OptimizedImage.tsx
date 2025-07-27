@@ -146,7 +146,7 @@ export function ProductImage({
 export function CuratorImage({
   src,
   alt,
-  size = 'avatar',
+  size = 'original',
   ...props
 }: Omit<OptimizedImageProps, 'type' | 'curatorSize'> & { size?: 'avatar' | 'banner' | 'original' }) {
   return (
