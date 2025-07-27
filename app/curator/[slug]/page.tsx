@@ -125,6 +125,9 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
   
   // Detailed runtime inspection to confirm null to undefined conversion
   console.log("✅ Final transformedCurator object", JSON.stringify(transformedCurator, null, 2));
+  
+  // CRITICAL: Confirm we're using transformedCurator, not raw curator
+  console.log("USING transformedCurator ✅", transformedCurator);
 
   return (
     <>
@@ -140,6 +143,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
       {/* Raw curator object from Prisma has string | null fields, but component expects string | undefined */}
       {/* CRITICAL: Only transformedCurator should be passed, never the raw curator object */}
       {/* URGENT FIX: This line MUST use transformedCurator, not curator */}
+      {/* CRITICAL: Never pass raw curator object - only use transformedCurator */}
       <CuratorDetailClient curator={transformedCurator} />
     </>
   )
