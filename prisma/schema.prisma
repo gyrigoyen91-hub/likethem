@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum Role {
+  ADMIN
+  CURATOR
+  BUYER
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  password       String
+  role           Role            @default(BUYER)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  fullName       String?
+  avatar         String?
+  cartItems      CartItem[]
+  curatorProfile CuratorProfile?
+  favorites      Favorite[]
+  orders         Order[]         @relation("BuyerOrders")
+
+  @@map("users")
+}
+
+model CuratorProfile {
+  id                            String                 @id @default(cuid())
+  userId                        String                 @unique
+  storeName                     String
+  bio                           String?
+  bannerImage                   String?
+  instagram                     String?
+  tiktok                        String?
+  youtube                       String?
+  twitter                       String?
+  isPublic                      Boolean                @default(true)
+  isEditorsPick                 Boolean                @default(false)
+  notifyFollowers               Boolean                @default(true)
+  notifyFavorites               Boolean                @default(true)
+  notifyCollaborations          Boolean                @default(true)
+  notifyOrders                  Boolean                @default(true)
+  showSales                     Boolean                @default(false)
+  showEarnings                  Boolean                @default(true)
+  allowCollaborations           Boolean                @default(true)
+  stripeAccountId               String?
+  stripeAccountStatus           String                 @default("PENDING")
+  createdAt                     DateTime               @default(now())
+  updatedAt                     DateTime               @updatedAt
+  slug                          String                 @unique
+  collaborationRequestsReceived CollaborationRequest[] @relation("ToCurator")
+  collaborationRequests         CollaborationRequest[] @relation("FromCurator")
+  collaborations2               Collaboration[]        @relation("CuratorCollaborations2")
+  collaborations1               Collaboration[]        @relation("CuratorCollaborations1")
+  user                          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders                        Order[]                @relation("CuratorOrders")
+  products                      Product[]
+
+  @@map("curator_profiles")
+}
+
+model Product {
+  id            String         @id @default(cuid())
+  curatorId     String
+  title         String
+  description   String
+  price         Float
+  category      String
+  tags          String
+  sizes         String
+  colors        String
+  stockQuantity Int            @default(0)
+  isActive      Boolean        @default(true)
+  isFeatured    Boolean        @default(false)
+  curatorNote   String?
+  slug          String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  cartItems     CartItem[]
+  favorites     Favorite[]
+  orderItems    OrderItem[]
+  images        ProductImage[]
+  curator       CuratorProfile @relation(fields: [curatorId], references: [id], onDelete: Cascade)
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  altText   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Order {
+  id                    String           @id @default(cuid())
+  buyerId               String
+  curatorId             String
+  status                String           @default("PENDING")
+  totalAmount           Float
+  commission            Float
+  curatorAmount         Float
+  stripePaymentIntentId String?
+  stripeTransferId      String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  paymentMethod         String?
+  paymentProof          String?
+  transactionCode       String?
+  items                 OrderItem[]
+  curator               CuratorProfile   @relation("CuratorOrders", fields: [curatorId], references: [id])
+  buyer                 User             @relation("BuyerOrders", fields: [buyerId], references: [id])
+  shippingAddress       ShippingAddress?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  size      String?
+  color     String?
+  product   Product @relation(fields: [productId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+model ShippingAddress {
+  id       String  @id @default(cuid())
+  orderId  String  @unique
+  fullName String
+  email    String
+  phone    String?
+  address  String
+  city     String
+  state    String
+  zipCode  String
+  country  String
+  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("shipping_addresses")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  quantity  Int      @default(1)
+  size      String?
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, size, color])
+  @@map("cart_items")
+}
+
+model Collaboration {
+  id           String         @id @default(cuid())
+  curator1Id   String
+  curator2Id   String
+  projectName  String
+  description  String?
+  status       String         @default("ACTIVE")
+  jointPageUrl String?
+  startDate    DateTime       @default(now())
+  endDate      DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  curator2     CuratorProfile @relation("CuratorCollaborations2", fields: [curator2Id], references: [id])
+  curator1     CuratorProfile @relation("CuratorCollaborations1", fields: [curator1Id], references: [id])
+
+  @@unique([curator1Id, curator2Id])
+  @@map("collaborations")
+}
+
+model CollaborationRequest {
+  id            String         @id @default(cuid())
+  fromCuratorId String
+  toCuratorId   String
+  message       String
+  projectType   String?
+  status        String         @default("PENDING")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  toCurator     CuratorProfile @relation("ToCurator", fields: [toCuratorId], references: [id], onDelete: Cascade)
+  fromCurator   CuratorProfile @relation("FromCurator", fields: [fromCuratorId], references: [id], onDelete: Cascade)
+
+  @@map("collaboration_requests")
+}
