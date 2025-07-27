@@ -128,6 +128,8 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
   
   // CRITICAL: Confirm we're using transformedCurator, not raw curator
   console.log("USING transformedCurator ✅", transformedCurator);
+  
+  // FORCE VERCEL DEPLOYMENT - This ensures the latest code is deployed
 
   return (
     <>
