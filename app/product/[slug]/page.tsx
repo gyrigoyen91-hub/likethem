@@ -11,14 +11,9 @@ interface ProductPageProps {
 }
 
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    select: { slug: true }
-  })
-
-  return products.map((product) => ({
-    slug: product.slug,
-  }))
+  // Return empty array to prevent build-time database access
+  // Pages will be generated dynamically at runtime
+  return []
 }
 
 export async function generateMetadata({ params }: ProductPageProps) {
