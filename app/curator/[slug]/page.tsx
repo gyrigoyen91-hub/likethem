@@ -130,6 +130,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
   console.log("USING transformedCurator ✅", transformedCurator);
   
   // FORCE VERCEL DEPLOYMENT - This ensures the latest code is deployed
+  // UNBLOCK QUEUED DEPLOYMENT - Force fresh build recognition
 
   return (
     <>
