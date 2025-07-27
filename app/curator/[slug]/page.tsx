@@ -136,6 +136,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
       {/* This converts string | null to string | undefined for all optional fields */}
       {/* Raw curator object from Prisma has string | null fields, but component expects string | undefined */}
       {/* CRITICAL: Only transformedCurator should be passed, never the raw curator object */}
+      {/* URGENT FIX: This line MUST use transformedCurator, not curator */}
       <CuratorDetailClient curator={transformedCurator} />
     </>
   )
