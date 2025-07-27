@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
             userId: user.id,
             storeName,
             bio: bio || null,
+            slug: storeName.toLowerCase().replace(/\s+/g, '-'),
           }
         })
       }
