@@ -12,14 +12,9 @@ interface CuratorPageProps {
 }
 
 export async function generateStaticParams() {
-  const curators = await prisma.curatorProfile.findMany({
-    where: { isPublic: true },
-    select: { slug: true }
-  })
-
-  return curators.map((curator) => ({
-    slug: curator.slug,
-  }))
+  // Return empty array to prevent build-time database access
+  // Pages will be generated dynamically at runtime
+  return []
 }
 
 export async function generateMetadata({ params }: CuratorPageProps) {
