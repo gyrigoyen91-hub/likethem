@@ -3,6 +3,14 @@ import { getServerSession } from 'next-auth'
 import { PrismaClient } from '@prisma/client'
 import { authOptions } from '../auth/[...nextauth]/auth'
 
+interface OrderItem {
+  productId: string
+  quantity: number
+  price: number
+  size?: string
+  color?: string
+}
+
 const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
@@ -32,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate totals
     let totalAmount = 0
-    const orderItems = []
+    const orderItems: OrderItem[] = []
 
     for (const item of items) {
       const product = await prisma.product.findUnique({
