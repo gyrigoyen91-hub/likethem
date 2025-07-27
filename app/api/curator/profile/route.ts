@@ -38,7 +38,23 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ curatorProfile })
+    // Transform the curator profile data to handle null values
+    const transformedCuratorProfile = {
+      ...curatorProfile,
+      bio: curatorProfile.bio ?? undefined,
+      bannerImage: curatorProfile.bannerImage ?? undefined,
+      instagram: curatorProfile.instagram ?? undefined,
+      tiktok: curatorProfile.tiktok ?? undefined,
+      youtube: curatorProfile.youtube ?? undefined,
+      twitter: curatorProfile.twitter ?? undefined,
+      user: {
+        ...curatorProfile.user,
+        fullName: curatorProfile.user.fullName ?? undefined,
+        avatar: curatorProfile.user.avatar ?? undefined,
+      }
+    }
+
+    return NextResponse.json({ curatorProfile: transformedCuratorProfile })
   } catch (error) {
     console.error('Error fetching curator profile:', error)
     return NextResponse.json(
@@ -129,10 +145,26 @@ export async function POST(request: NextRequest) {
       data: { role: 'CURATOR' }
     })
 
+    // Transform the curator profile data to handle null values
+    const transformedCuratorProfile = {
+      ...curatorProfile,
+      bio: curatorProfile.bio ?? undefined,
+      bannerImage: curatorProfile.bannerImage ?? undefined,
+      instagram: curatorProfile.instagram ?? undefined,
+      tiktok: curatorProfile.tiktok ?? undefined,
+      youtube: curatorProfile.youtube ?? undefined,
+      twitter: curatorProfile.twitter ?? undefined,
+      user: {
+        ...curatorProfile.user,
+        fullName: curatorProfile.user.fullName ?? undefined,
+        avatar: curatorProfile.user.avatar ?? undefined,
+      }
+    }
+
     return NextResponse.json(
       { 
         message: 'Curator profile created successfully',
-        curatorProfile 
+        curatorProfile: transformedCuratorProfile
       },
       { status: 201 }
     )

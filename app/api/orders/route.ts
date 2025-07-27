@@ -208,7 +208,44 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ orders })
+    // Transform the orders data to handle Date objects and null values
+    const transformedOrders = orders.map(order => ({
+      ...order,
+      createdAt: order.createdAt.toISOString(),
+      updatedAt: order.updatedAt.toISOString(),
+      items: order.items.map(item => ({
+        ...item,
+        product: {
+          ...item.product,
+          curatorNote: item.product.curatorNote ?? undefined,
+          createdAt: item.product.createdAt.toISOString(),
+          updatedAt: item.product.updatedAt.toISOString(),
+          images: item.product.images.map(image => ({
+            ...image,
+            altText: image.altText ?? undefined,
+          }))
+        }
+      })),
+      buyer: {
+        ...order.buyer,
+        fullName: order.buyer.fullName ?? undefined,
+      },
+      curator: {
+        ...order.curator,
+        bio: order.curator.bio ?? undefined,
+        bannerImage: order.curator.bannerImage ?? undefined,
+        instagram: order.curator.instagram ?? undefined,
+        tiktok: order.curator.tiktok ?? undefined,
+        youtube: order.curator.youtube ?? undefined,
+        twitter: order.curator.twitter ?? undefined,
+        user: {
+          ...order.curator.user,
+          fullName: order.curator.user.fullName ?? undefined,
+        }
+      }
+    }))
+
+    return NextResponse.json({ orders: transformedOrders })
 
   } catch (error) {
     console.error('Error fetching orders:', error)

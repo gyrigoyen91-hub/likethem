@@ -94,6 +94,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound()
   }
 
+  // Transform the product data to match the expected Product interface
+  const transformedProduct = {
+    ...product,
+    curatorNote: product.curatorNote ?? undefined,
+    createdAt: product.createdAt.toISOString(),
+    updatedAt: product.updatedAt.toISOString(),
+    curator: {
+      ...product.curator,
+      bio: product.curator.bio ?? undefined,
+      user: {
+        ...product.curator.user,
+        fullName: product.curator.user.fullName ?? undefined,
+      }
+    },
+    images: product.images.map(image => ({
+      ...image,
+      altText: image.altText ?? undefined,
+    }))
+  }
+
   const description = product.curatorNote || product.description
   const imageUrl = product.images[0]?.url || ''
   const tags = product.tags ? product.tags.split(',').map(tag => tag.trim()) : []
@@ -111,7 +131,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         tags={tags}
       />
       
-      <ProductDetailClient product={product} />
+      <ProductDetailClient product={transformedProduct} />
     </>
   )
 } 

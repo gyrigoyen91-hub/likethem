@@ -45,7 +45,27 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(product)
+    // Transform the product data to handle Date objects and null values
+    const transformedProduct = {
+      ...product,
+      curatorNote: product.curatorNote ?? undefined,
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
+      curator: {
+        ...product.curator,
+        bio: product.curator.bio ?? undefined,
+        user: {
+          ...product.curator.user,
+          fullName: product.curator.user.fullName ?? undefined,
+        }
+      },
+      images: product.images.map(image => ({
+        ...image,
+        altText: image.altText ?? undefined,
+      }))
+    }
+
+    return NextResponse.json(transformedProduct)
   } catch (error) {
     console.error('Error fetching product:', error)
     return NextResponse.json(
