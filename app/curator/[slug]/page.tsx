@@ -93,18 +93,18 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
   const transformedCurator = {
     id: curator.id,
     storeName: curator.storeName,
-    bio: curator.bio || undefined,
-    bannerImage: curator.bannerImage || undefined,
-    instagram: curator.instagram || undefined,
-    tiktok: curator.tiktok || undefined,
-    youtube: curator.youtube || undefined,
-    twitter: curator.twitter || undefined,
+    bio: curator.bio ?? undefined,
+    bannerImage: curator.bannerImage ?? undefined,
+    instagram: curator.instagram ?? undefined,
+    tiktok: curator.tiktok ?? undefined,
+    youtube: curator.youtube ?? undefined,
+    twitter: curator.twitter ?? undefined,
     isEditorsPick: curator.isEditorsPick,
     slug: curator.slug,
     user: {
       id: curator.user.id,
-      fullName: curator.user.fullName || undefined,
-      avatar: curator.user.avatar || undefined
+      fullName: curator.user.fullName ?? undefined,
+      avatar: curator.user.avatar ?? undefined
     },
     products: curator.products.map(product => ({
       id: product.id,
@@ -116,14 +116,14 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
       sizes: product.sizes,
       colors: product.colors,
       stockQuantity: product.stockQuantity,
-      curatorNote: product.curatorNote || undefined,
+      curatorNote: product.curatorNote ?? undefined,
       slug: product.slug,
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
       images: product.images.map(image => ({
         id: image.id,
         url: image.url,
-        altText: image.altText || undefined,
+        altText: image.altText ?? undefined,
         order: image.order
       }))
     }))
