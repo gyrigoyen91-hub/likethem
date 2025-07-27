@@ -4,6 +4,7 @@ import { CuratorSEO } from '@/components/SEO'
 import { CuratorImage } from '@/components/OptimizedImage'
 import CuratorDetailClient from '@/components/CuratorDetailClient'
 
+// Force Vercel cache invalidation - trivial change
 const prisma = new PrismaClient()
 
 interface CuratorPageProps {
