@@ -90,6 +90,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
   }
 
   // Transform the data to match the expected Curator interface
+  // This converts all string | null values from Prisma to string | undefined for TypeScript compatibility
   const transformedCurator = {
     ...curator,
     bio: curator.bio ?? undefined,
@@ -127,7 +128,8 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
         slug={curator.slug}
       />
       
-      {/* Use transformedCurator to ensure proper TypeScript compatibility */}
+      {/* IMPORTANT: Use transformedCurator (not raw curator) to ensure TypeScript compatibility */}
+      {/* This converts string | null to string | undefined for all optional fields */}
       <CuratorDetailClient curator={transformedCurator} />
     </>
   )
