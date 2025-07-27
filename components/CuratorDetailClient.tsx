@@ -100,7 +100,7 @@ export default function CuratorDetailClient({ curator }: CuratorDetailClientProp
             <CuratorImage
               src={curator.bannerImage}
               alt={`${curator.storeName} banner`}
-              size="banner"
+              size="original"
               fill
               className="object-cover"
             />
@@ -136,7 +136,7 @@ export default function CuratorDetailClient({ curator }: CuratorDetailClientProp
                 <CuratorImage
                   src={curator.user.avatar || '/default-avatar.png'}
                   alt={curator.storeName}
-                  size="avatar"
+                  size="original"
                   width={128}
                   height={128}
                   className="w-full h-full object-cover"
