@@ -1,12 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    domains: ['images.unsplash.com', 'via.placeholder.com'],
-  },
-  // Force development server to use port 3000
   experimental: {
-    // This ensures consistent port usage
+    serverComponentsExternalPackages: ['@prisma/client'],
   },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      }
+    }
+    return config
+  },
+  // Disable static generation to prevent SSR issues with framer-motion
+  output: 'standalone',
 }
 
 module.exports = nextConfig 

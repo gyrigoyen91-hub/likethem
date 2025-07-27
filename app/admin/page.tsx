@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Users, ShoppingBag, Store, BarChart3, Settings, Shield } from 'lucide-react'
 
+// Force dynamic rendering to prevent build issues
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboard() {
   const user = await getCurrentUser()
   
