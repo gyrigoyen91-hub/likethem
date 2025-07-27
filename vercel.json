@@ -9,5 +9,8 @@
     "app/**/*.tsx": {
       "maxDuration": 30
     }
+  },
+  "env": {
+    "PRISMA_GENERATE_DATAPROXY": "true"
   }
 } 
