@@ -1,35 +1,42 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth'
-import { PrismaClient } from '@prisma/client'
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth"
+import { prisma } from "@/lib/prisma"
 import AccountClient from './AccountClient'
-
-const prisma = new PrismaClient()
 
 export default async function AccountPage() {
   const session = await getServerSession(authOptions)
-  
-  if (!session?.user?.id) {
-    redirect('/auth/signin')
+
+  if (!session?.user?.email && !session?.user?.id) {
+    return redirect(`/auth/signin?callbackUrl=${encodeURIComponent("/account")}`)
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
+  const email = session.user.email ?? null
+  const sid = (session.user as any)?.id ?? null
+
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        email ? { email } : undefined,
+        sid ? { id: sid } : undefined,
+      ].filter(Boolean) as any[],
+    },
     select: { 
       id: true, 
-      email: true, 
       fullName: true, 
       avatar: true, 
-      provider: true,
+      email: true, 
+      phone: true, 
+      provider: true, 
       emailVerified: true,
-      phone: true,
       role: true
-    }
+    },
   })
 
-  if (!dbUser) {
-    redirect('/auth/signin')
+  if (!user) {
+    console.warn("[account] user not found for session", { email, sid })
+    return redirect(`/auth/signin?callbackUrl=${encodeURIComponent("/account")}`)
   }
 
-  return <AccountClient user={dbUser} session={session} />
+  return <AccountClient user={user} session={session} />
 }

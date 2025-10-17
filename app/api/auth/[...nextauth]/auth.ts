@@ -1,10 +1,8 @@
 import NextAuth, { AuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -135,23 +133,56 @@ export const authOptions: AuthOptions = {
       return token
     },
     async session({ session, token, user }: any) {
-      const uid = (user?.id ?? token?.sub) as string | undefined
-      session.user.id = uid
-      session.user.email = (user?.email ?? token?.email ?? session.user.email) as string | undefined
-      session.user.name = (user as any)?.fullName ?? (token as any)?.fullName ?? session.user.name
-      session.user.image = (user as any)?.avatar ?? (token as any)?.avatar ?? session.user.image
-      
-      if (token) {
-        session.user.role = token.role as string
-        session.user.fullName = token.fullName as string
-        session.user.avatar = token.avatar as string
-        session.user.phone = token.phone as string
-        session.user.curatorProfileId = token.curatorProfileId as string
-        session.user.storeName = token.storeName as string
-        session.user.isPublic = token.isPublic as boolean
-        session.user.isEditorsPick = token.isEditorsPick as boolean
+      try {
+        // Prefer an email to resolve the DB identity
+        const email =
+          (user as any)?.email ??
+          session?.user?.email ??
+          (token as any)?.email ??
+          null;
+
+        let dbUser = null;
+        if (email) {
+          dbUser = await prisma.user.findUnique({
+            where: { email },
+            select: { id: true, fullName: true, avatar: true, email: true, provider: true, emailVerified: true, phone: true, role: true },
+          });
+        }
+
+        // Compose session.user from DB when available
+        session.user = {
+          id: dbUser?.id                       // <-- DB UUID
+              ?? (user as any)?.id
+              ?? (token as any)?.sub
+              ?? (session.user as any)?.id
+              ?? null,
+          name: dbUser?.fullName ?? session.user?.name ?? null,
+          email: dbUser?.email ?? session.user?.email ?? null,
+          image: dbUser?.avatar ?? session.user?.image ?? null,
+          // Keep custom fields from token if available
+          role: dbUser?.role ?? token?.role ?? 'BUYER',
+          fullName: dbUser?.fullName ?? token?.fullName ?? null,
+          avatar: dbUser?.avatar ?? token?.avatar ?? null,
+          phone: dbUser?.phone ?? token?.phone ?? null,
+          provider: dbUser?.provider ?? token?.provider ?? null,
+          emailVerified: dbUser?.emailVerified ?? token?.emailVerified ?? null,
+          curatorProfileId: token?.curatorProfileId ?? null,
+          storeName: token?.storeName ?? null,
+          isPublic: token?.isPublic ?? null,
+          isEditorsPick: token?.isEditorsPick ?? null,
+        } as any;
+
+        console.log("[auth][session] resolved", {
+          hasDBUser: !!dbUser,
+          sessionUserId: (session.user as any)?.id,
+          email: session.user?.email,
+        });
+
+        return session;
+      } catch (err) {
+        console.error("[auth][session] error", err);
+        return session; // never block
       }
-      return session
     }
   },
   pages: {
