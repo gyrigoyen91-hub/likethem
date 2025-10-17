@@ -68,70 +68,53 @@ export const authOptions: AuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      // Log sign-in attempt for debugging
-      console.log('Sign-in attempt:', { 
-        provider: account?.provider, 
-        email: user.email, 
-        emailVerified: profile?.email_verified 
-      })
-      
-      // Handle Google OAuth sign-in
-      if (account?.provider === 'google') {
-        try {
-          const isGoogle = account?.provider === "google"
+    async signIn({ user, account, profile }: {
+      user: any;
+      account?: { provider?: string } | null;
+      profile?: unknown;
+    }) {
+      try {
+        const provider = account?.provider ?? 'unknown';
 
-          const googleEmailVerified =
-            isGoogle && (profile as Record<string, any>)?.email_verified === true
+        // SAFE casting for Google profile shape
+        const googleProfile = (profile ?? {}) as { email_verified?: boolean };
 
-          const emailVerifiedAt: Date | null = googleEmailVerified ? new Date() : null
+        // Map Google's boolean to our Prisma Date | null
+        const emailVerifiedAt: Date | null =
+          googleProfile.email_verified === true ? new Date() : null;
 
-          const dbUser = await prisma.user.upsert({
-            where: { email: user.email! },
-            update: {
-              fullName: user.name,
-              avatar: user.image,
-              emailVerified: emailVerifiedAt,
-            },
-            create: {
-              email: user.email!,
-              fullName: user.name ?? null,
-              avatar: user.image ?? null,
-              role: 'BUYER', // Default role for new users
-              password: '', // Empty password for OAuth users
-              emailVerified: emailVerifiedAt,
-            },
-            include: {
-              curatorProfile: {
-                select: {
-                  id: true,
-                  storeName: true,
-                  isPublic: true,
-                  isEditorsPick: true
-                }
-              }
-            }
-          })
+        // Upsert user atomically (no race between find/create/update)
+        await prisma.user.upsert({
+          where: { email: user.email! },
+          create: {
+            email: user.email!,
+            name: user.name ?? '',
+            image: user.image ?? null,
+            provider,
+            emailVerified: emailVerifiedAt,
+          },
+          update: {
+            name: user.name ?? undefined,
+            image: user.image ?? undefined,
+            provider,
+            // only set if we have a value; otherwise leave as-is
+            ...(emailVerifiedAt !== null ? { emailVerified: emailVerifiedAt } : {}),
+          },
+        });
 
-          console.log("[auth] google email_verified:", (profile as Record<string, any>)?.email_verified)
-          
-          // Return user data for session
-          user.id = dbUser.id
-          user.role = dbUser.role
-          user.fullName = dbUser.fullName || undefined
-          user.avatar = dbUser.avatar || undefined
-          user.curatorProfileId = dbUser.curatorProfile?.id
-          user.storeName = dbUser.curatorProfile?.storeName
-          user.isPublic = dbUser.curatorProfile?.isPublic
-          user.isEditorsPick = dbUser.curatorProfile?.isEditorsPick
-        } catch (error) {
-          console.error('Error handling Google sign-in:', error)
-          // Don't block sign-in on errors, just log them
-          // return false
-        }
+        console.log('[auth] signIn ok', {
+          provider,
+          email: user.email,
+          googleEmailVerified: googleProfile.email_verified ?? null,
+        });
+
+        // Never block sign-in here
+        return true;
+      } catch (err) {
+        console.error('[auth] signIn error', err);
+        // Do not block user auth flow
+        return true;
       }
-      
-      return true
     },
     async jwt({ token, user }: any) {
       if (user) {
