@@ -11,8 +11,8 @@ interface User {
   avatar: string | null
   provider: string | null
   emailVerified: Date | null
+  phone: string | null
   role: string
-  // TODO: Add phone field after production DB migration
 }
 
 interface Session {
@@ -47,7 +47,7 @@ export default function AccountClient({ user, session }: AccountClientProps) {
   // Use real user data with fallbacks
   const displayName = user.fullName ?? session.user.name ?? ''
   const displayEmail = user.email ?? session.user.email ?? ''
-  const displayPhone = '' // TODO: Load from user.phone after production DB migration
+  const displayPhone = user.phone ?? ''
   const displayAvatar = user.avatar ?? session.user.image ?? null
 
   return (
@@ -143,7 +143,7 @@ function PersonalDetails({
 }) {
   const [formData, setFormData] = useState({
     fullName: displayName,
-    phone: '' // TODO: Initialize from user.phone after production DB migration
+    phone: displayPhone
   })
   const [isSaving, setIsSaving] = useState(false)
 
@@ -161,7 +161,7 @@ function PersonalDetails({
         },
         body: JSON.stringify({
           fullName: formData.fullName,
-          // TODO: Add phone: formData.phone after production DB migration
+          phone: formData.phone,
         }),
       })
 
@@ -186,7 +186,7 @@ function PersonalDetails({
   const handleCancel = () => {
     setFormData({
       fullName: displayName,
-      phone: '' // TODO: Reset to user.phone after production DB migration
+      phone: displayPhone
     })
     setIsEditing(false)
   }

@@ -14,32 +14,35 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { fullName } = body
-    // TODO: Add phone field after production DB migration
+    const { fullName, phone } = body
 
     // Validate input
     if (fullName && typeof fullName !== 'string') {
       return NextResponse.json({ error: 'Invalid fullName' }, { status: 400 })
     }
 
-    // Update user in database - only safe fields for now
+    if (phone && typeof phone !== 'string') {
+      return NextResponse.json({ error: 'Invalid phone' }, { status: 400 })
+    }
+
+    // Update user in database
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
         ...(fullName !== undefined && { fullName: fullName || null }),
-        // TODO: Add phone field after production DB migration
+        ...(phone !== undefined && { phone: phone || null }),
       },
       select: {
         id: true,
         email: true,
         fullName: true,
         avatar: true,
+        phone: true,
         role: true,
-        // TODO: Add phone field after production DB migration
       }
     })
 
-    console.log('[account] User updated:', { userId: session.user.id, fullName })
+    console.log('[account] User updated:', { userId: session.user.id, fullName, phone })
 
     return NextResponse.json({ 
       success: true, 
