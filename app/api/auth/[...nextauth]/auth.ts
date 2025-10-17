@@ -69,6 +69,13 @@ export const authOptions: AuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
+      // Log sign-in attempt for debugging
+      console.log('Sign-in attempt:', { 
+        provider: account?.provider, 
+        email: user.email, 
+        emailVerified: profile?.email_verified 
+      })
+      
       // Handle Google OAuth sign-in
       if (account?.provider === 'google') {
         try {
@@ -141,7 +148,8 @@ export const authOptions: AuthOptions = {
           }
         } catch (error) {
           console.error('Error handling Google sign-in:', error)
-          return false
+          // Don't block sign-in on errors, just log them
+          // return false
         }
       }
       
