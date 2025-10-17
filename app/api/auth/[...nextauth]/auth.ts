@@ -83,22 +83,27 @@ export const authOptions: AuthOptions = {
         const emailVerifiedAt: Date | null =
           googleProfile.email_verified === true ? new Date() : null;
 
+        // Map NextAuth user fields to our Prisma columns safely
+        const mappedFullName = (user as any)?.name ?? null
+        const mappedAvatar = (user as any)?.image ?? null
+
         // Upsert user atomically (no race between find/create/update)
         await prisma.user.upsert({
           where: { email: user.email! },
           create: {
             email: user.email!,
-            name: user.name ?? '',
-            image: user.image ?? null,
+            password: '', // Empty password for OAuth users
+            fullName: mappedFullName,
+            avatar: mappedAvatar,
             provider,
             emailVerified: emailVerifiedAt,
           },
           update: {
-            name: user.name ?? undefined,
-            image: user.image ?? undefined,
+            // Only update if values are present; undefined fields won't overwrite existing data
+            ...(mappedFullName !== null ? { fullName: mappedFullName } : {}),
+            ...(mappedAvatar !== null ? { avatar: mappedAvatar } : {}),
             provider,
-            // only set if we have a value; otherwise leave as-is
-            ...(emailVerifiedAt !== null ? { emailVerified: emailVerifiedAt } : {}),
+            ...(emailVerifiedAt ? { emailVerified: emailVerifiedAt } : {}),
           },
         });
 

@@ -22,6 +22,8 @@ model User {
   updatedAt      DateTime        @updatedAt
   fullName       String?
   avatar         String?
+  provider       String?
+  emailVerified  DateTime?
   cartItems      CartItem[]
   curatorProfile CuratorProfile?
   favorites      Favorite[]
