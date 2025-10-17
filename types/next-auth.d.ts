@@ -17,9 +17,12 @@ declare module 'next-auth' {
     user: {
       id: string
       email: string
+      name?: string
+      image?: string
       role: string
       fullName?: string
       avatar?: string
+      phone?: string
       curatorProfileId?: string
       storeName?: string
       isPublic?: boolean
@@ -33,6 +36,7 @@ declare module 'next-auth/jwt' {
     role: string
     fullName?: string
     avatar?: string
+    phone?: string
     curatorProfileId?: string
     storeName?: string
     isPublic?: boolean

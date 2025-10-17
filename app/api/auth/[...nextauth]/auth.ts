@@ -126,6 +126,7 @@ export const authOptions: AuthOptions = {
         token.role = user.role
         token.fullName = user.fullName
         token.avatar = user.avatar
+        token.phone = user.phone
         token.curatorProfileId = user.curatorProfileId
         token.storeName = user.storeName
         token.isPublic = user.isPublic
@@ -133,12 +134,18 @@ export const authOptions: AuthOptions = {
       }
       return token
     },
-    async session({ session, token }: any) {
+    async session({ session, token, user }: any) {
+      const uid = (user?.id ?? token?.sub) as string | undefined
+      session.user.id = uid
+      session.user.email = (user?.email ?? token?.email ?? session.user.email) as string | undefined
+      session.user.name = (user as any)?.fullName ?? (token as any)?.fullName ?? session.user.name
+      session.user.image = (user as any)?.avatar ?? (token as any)?.avatar ?? session.user.image
+      
       if (token) {
-        session.user.id = token.sub!
         session.user.role = token.role as string
         session.user.fullName = token.fullName as string
         session.user.avatar = token.avatar as string
+        session.user.phone = token.phone as string
         session.user.curatorProfileId = token.curatorProfileId as string
         session.user.storeName = token.storeName as string
         session.user.isPublic = token.isPublic as boolean

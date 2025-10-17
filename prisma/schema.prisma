@@ -22,6 +22,7 @@ model User {
   updatedAt      DateTime        @updatedAt
   fullName       String?
   avatar         String?
+  phone          String?
   provider       String?
   emailVerified  DateTime?
   cartItems      CartItem[]
