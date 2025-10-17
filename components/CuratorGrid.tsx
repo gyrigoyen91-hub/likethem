@@ -15,7 +15,8 @@ const curators = [
     image: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     followers: '2.4M',
     location: 'Paris',
-    isEditorPick: true
+    isEditorPick: true,
+    slug: 'sofia-laurent'
   },
   {
     id: 2,
@@ -24,7 +25,8 @@ const curators = [
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
     followers: '1.8M',
     location: 'Tokyo',
-    isEditorPick: false
+    isEditorPick: false,
+    slug: 'marcus-chen'
   },
   {
     id: 3,
@@ -33,7 +35,8 @@ const curators = [
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     followers: '3.1M',
     location: 'Milan',
-    isEditorPick: true
+    isEditorPick: true,
+    slug: 'isabella-rossi'
   },
   {
     id: 4,
@@ -42,7 +45,8 @@ const curators = [
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
     followers: '950K',
     location: 'Los Angeles',
-    isEditorPick: false
+    isEditorPick: false,
+    slug: 'alex-rivera'
   },
   {
     id: 5,
@@ -51,7 +55,8 @@ const curators = [
     image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
     followers: '1.2M',
     location: 'London',
-    isEditorPick: false
+    isEditorPick: false,
+    slug: 'emma-thompson'
   },
   {
     id: 6,
@@ -60,7 +65,8 @@ const curators = [
     image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     followers: '680K',
     location: 'Kyoto',
-    isEditorPick: false
+    isEditorPick: false,
+    slug: 'yuki-tanaka'
   }
 ]
 
@@ -101,7 +107,7 @@ export default function CuratorGrid({ searchQuery = '' }: CuratorGridProps) {
             transition={{ duration: 0.8, delay: index * 0.1 }}
             className="group cursor-pointer"
           >
-            <Link href={`/curator/${curator.id}`}>
+            <Link href={`/curator/${curator.slug ?? curator.id}`}>
               <div className="relative overflow-hidden bg-stone">
                 <img
                   src={curator.image}

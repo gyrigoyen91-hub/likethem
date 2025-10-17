@@ -12,7 +12,8 @@ const curators = [
     tagline: 'Minimal Parisian',
     image: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     followers: '2.4M',
-    location: 'Based in Paris'
+    location: 'Based in Paris',
+    slug: 'sofia-laurent'
   },
   {
     id: 2,
@@ -20,7 +21,8 @@ const curators = [
     tagline: 'Tokyo Streetwear',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
     followers: '1.8M',
-    location: 'Based in Tokyo'
+    location: 'Based in Tokyo',
+    slug: 'marcus-chen'
   },
   {
     id: 3,
@@ -28,7 +30,8 @@ const curators = [
     tagline: 'Italian Elegance',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     followers: '3.1M',
-    location: 'Based in Milan'
+    location: 'Based in Milan',
+    slug: 'isabella-rossi'
   },
   {
     id: 4,
@@ -36,7 +39,8 @@ const curators = [
     tagline: 'Vintage Vibes',
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
     followers: '950K',
-    location: 'Based in Los Angeles'
+    location: 'Based in Los Angeles',
+    slug: 'alex-rivera'
   }
 ]
 
@@ -92,7 +96,7 @@ function CuratorCard({ curator, index }: { curator: any; index: number }) {
       viewport={{ once: true }}
       className="group cursor-pointer"
     >
-      <Link href={`/curator/${curator.id}`}>
+      <Link href={`/curator/${curator.slug ?? curator.id}`}>
         <div className="relative overflow-hidden bg-stone h-80 md:h-[420px]">
           {!imageError ? (
             <img

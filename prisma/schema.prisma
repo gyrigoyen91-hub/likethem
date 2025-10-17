@@ -65,6 +65,7 @@ model CuratorProfile {
   orders                        Order[]                @relation("CuratorOrders")
   products                      Product[]
 
+  @@unique([slug], map: "curator_slug_unique")
   @@map("curator_profiles")
 }
 

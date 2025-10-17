@@ -17,6 +17,7 @@ interface SearchResult {
   curatorName?: string
   bio?: string
   isEditorsPick?: boolean
+  slug?: string
 }
 
 export default function SearchResultsPage() {
@@ -229,7 +230,7 @@ export default function SearchResultsPage() {
                 transition={{ duration: 0.5 }}
                 className={viewMode === 'grid' ? 'group cursor-pointer' : 'flex items-center space-x-6 p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow'}
               >
-                <Link href={result.type === 'product' ? `/product/${result.id}` : `/curator/${result.id}`}>
+                <Link href={result.type === 'product' ? `/product/${result.id}` : `/curator/${result.slug ?? result.id}`}>
                   <div className={viewMode === 'grid' ? 'space-y-4' : 'flex items-center space-x-6'}>
                     {/* Image */}
                     <div className={viewMode === 'grid' ? 'relative overflow-hidden bg-gray-100 rounded-lg aspect-square' : 'w-24 h-24 flex-shrink-0'}>

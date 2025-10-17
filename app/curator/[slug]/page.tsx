@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { serializePrisma } from '@/lib/serialize'
 import { CuratorSEO } from '@/components/SEO'
@@ -134,6 +134,12 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
     if (!curator || !curator.isPublic) {
       console.log('[curator][page] Curator not found or not public:', { slug, isPublic: curator?.isPublic })
       notFound()
+    }
+
+    // Canonical redirect: if accessed via ID/UUID and has slug, redirect to slug URL
+    if (curator.slug && (numericId || isUuid) && slug !== curator.slug) {
+      console.log('[curator][page] Redirecting to canonical slug URL:', { from: slug, to: curator.slug })
+      redirect(`/curator/${curator.slug}`)
     }
 
     // Transform the data to match the expected Curator interface
