@@ -20,8 +20,10 @@ export default async function AccountPage() {
       email: true, 
       fullName: true, 
       avatar: true, 
-      phone: true,
+      provider: true,
+      emailVerified: true,
       role: true
+      // TODO: Add phone field after production DB migration
     }
   })
 
