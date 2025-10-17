@@ -79,9 +79,28 @@ export const authOptions: AuthOptions = {
       // Handle Google OAuth sign-in
       if (account?.provider === 'google') {
         try {
-          // Check if user already exists
-          const existingUser = await prisma.user.findUnique({
+          const isGoogle = account?.provider === "google"
+
+          const googleEmailVerified =
+            isGoogle && (profile as Record<string, any>)?.email_verified === true
+
+          const emailVerifiedAt: Date | null = googleEmailVerified ? new Date() : null
+
+          const dbUser = await prisma.user.upsert({
             where: { email: user.email! },
+            update: {
+              fullName: user.name,
+              avatar: user.image,
+              emailVerified: emailVerifiedAt,
+            },
+            create: {
+              email: user.email!,
+              fullName: user.name ?? null,
+              avatar: user.image ?? null,
+              role: 'BUYER', // Default role for new users
+              password: '', // Empty password for OAuth users
+              emailVerified: emailVerifiedAt,
+            },
             include: {
               curatorProfile: {
                 select: {
@@ -94,58 +113,17 @@ export const authOptions: AuthOptions = {
             }
           })
 
-          if (existingUser) {
-            // Update user info if needed
-            if (existingUser.fullName !== user.name || existingUser.avatar !== user.image) {
-              await prisma.user.update({
-                where: { id: existingUser.id },
-                data: {
-                  fullName: user.name,
-                  avatar: user.image
-                }
-              })
-            }
-            
-            // Return user data for session
-            user.id = existingUser.id
-            user.role = existingUser.role
-            user.fullName = existingUser.fullName || undefined
-            user.avatar = existingUser.avatar || undefined
-            user.curatorProfileId = existingUser.curatorProfile?.id
-            user.storeName = existingUser.curatorProfile?.storeName
-            user.isPublic = existingUser.curatorProfile?.isPublic
-            user.isEditorsPick = existingUser.curatorProfile?.isEditorsPick
-          } else {
-            // Create new user
-            const newUser = await prisma.user.create({
-              data: {
-                email: user.email!,
-                fullName: user.name,
-                avatar: user.image,
-                role: 'BUYER', // Default role for new users
-                password: '', // Empty password for OAuth users
-              },
-              include: {
-                curatorProfile: {
-                  select: {
-                    id: true,
-                    storeName: true,
-                    isPublic: true,
-                    isEditorsPick: true
-                  }
-                }
-              }
-            })
-            
-            user.id = newUser.id
-            user.role = newUser.role
-            user.fullName = newUser.fullName || undefined
-            user.avatar = newUser.avatar || undefined
-            user.curatorProfileId = newUser.curatorProfile?.id
-            user.storeName = newUser.curatorProfile?.storeName
-            user.isPublic = newUser.curatorProfile?.isPublic
-            user.isEditorsPick = newUser.curatorProfile?.isEditorsPick
-          }
+          console.log("[auth] google email_verified:", (profile as Record<string, any>)?.email_verified)
+          
+          // Return user data for session
+          user.id = dbUser.id
+          user.role = dbUser.role
+          user.fullName = dbUser.fullName || undefined
+          user.avatar = dbUser.avatar || undefined
+          user.curatorProfileId = dbUser.curatorProfile?.id
+          user.storeName = dbUser.curatorProfile?.storeName
+          user.isPublic = dbUser.curatorProfile?.isPublic
+          user.isEditorsPick = dbUser.curatorProfile?.isEditorsPick
         } catch (error) {
           console.error('Error handling Google sign-in:', error)
           // Don't block sign-in on errors, just log them
