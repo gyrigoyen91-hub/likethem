@@ -97,7 +97,7 @@ export default async function CuratorPage({
       .from('curator_profiles')
       .select(`
         id, storeName, bio, bannerImage, isEditorsPick, slug, "isPublic",
-        user:users!inner(image)
+        user:users(image)
       `)
       .or(`slug.eq.${slug},id.eq.${slug}`)
       .maybeSingle()
