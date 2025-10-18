@@ -150,6 +150,9 @@ export default async function CuratorPage({
         slug: p.slug ?? null,
         imageUrl:
           (Array.isArray(p.product_images) && p.product_images[0]?.url) || null,
+        isFeatured: !!p.isFeatured,
+        createdAt: p.createdAt,
+        category: p.category ?? null,
       })) ?? []
 
     // 3) Category counts from database view (more efficient)
@@ -175,8 +178,9 @@ export default async function CuratorPage({
       categories = Array.from(categoriesMap.entries()).map(([name, count]) => ({ name, count }))
     }
 
-    // Products are already filtered and sorted by the server query
-    const filtered = products
+    // Split products into featured and regular
+    const featured = products.filter(p => p.isFeatured)
+    const regular = products.filter(p => !p.isFeatured)
 
     const description = (curator as any).bio || `Discover unique fashion curated by ${(curator as any).storeName}`
     const imageUrl = (curator as any).bannerImage || ''
@@ -184,7 +188,9 @@ export default async function CuratorPage({
     console.log('[curator][page] Successfully loaded curator with products:', {
       id: (curator as any).id,
       storeName: (curator as any).storeName,
-      productCount: filtered.length
+      totalProducts: products.length,
+      featuredCount: featured.length,
+      regularCount: regular.length
     })
 
   return (
@@ -209,11 +215,27 @@ export default async function CuratorPage({
             }}
           />
 
+          {/* Editor's Picks */}
+          {featured.length > 0 && (
+            <section className="mb-10">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Editor's Picks</h3>
+                <span className="text-sm text-gray-500">{featured.length} item{featured.length > 1 ? "s" : ""}</span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {featured.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Top toolbar */}
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">
               Curated Collection{" "}
-              <span className="text-gray-500">({filtered.length} {filtered.length === 1 ? "item" : "items"})</span>
+              <span className="text-gray-500">({regular.length} {regular.length === 1 ? "item" : "items"})</span>
             </h2>
             <div className="flex items-center gap-2">
               <FiltersSheet />
@@ -230,15 +252,15 @@ export default async function CuratorPage({
             </div>
           </div>
 
-          {/* Grid or Empty */}
-          {filtered.length === 0 ? (
-            <EmptyState name={(curator as any).storeName ?? "This curator"} />
-          ) : (
+          {/* Main grid (non-featured) or Empty */}
+          {regular.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((p) => (
+              {regular.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>
+          ) : (
+            <EmptyState name={(curator as any).storeName ?? "This curator"} />
           )}
         </div>
       </>

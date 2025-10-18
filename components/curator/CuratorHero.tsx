@@ -1,5 +1,6 @@
 // components/curator/CuratorHero.tsx
 import Link from "next/link";
+import ShareButton from "../ShareButton";
 
 type Curator = {
   id: string;
@@ -68,9 +69,7 @@ export default function CuratorHero({ curator }: { curator: Curator }) {
             >
               ← Back to Their Closets
             </Link>
-            <button className="rounded-full border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
-              Share
-            </button>
+            <ShareButton />
           </div>
         </div>
       </div>

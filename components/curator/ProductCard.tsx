@@ -7,6 +7,9 @@ export type ProductCardData = {
   price: number;
   slug: string | null;
   imageUrl: string | null;
+  isFeatured?: boolean;
+  createdAt?: string;
+  category?: string | null;
 };
 
 export default function ProductCard({ product }: { product: ProductCardData }) {
