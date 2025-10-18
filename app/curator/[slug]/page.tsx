@@ -92,10 +92,13 @@ export default async function CuratorPage({
 
     const s = getSupabaseServer()
     
-    // 1) Curator
+    // 1) Curator with user avatar
     const { data: curator, error: curatorError } = await s
       .from('curator_profiles')
-      .select('id, storeName, bio, bannerImage, isEditorsPick, slug, "isPublic"')
+      .select(`
+        id, storeName, bio, bannerImage, isEditorsPick, slug, "isPublic",
+        user:users!inner(image)
+      `)
       .or(`slug.eq.${slug},id.eq.${slug}`)
       .maybeSingle()
 
@@ -112,17 +115,32 @@ export default async function CuratorPage({
 
     console.log('[curator][page] Found curator:', { id: (curator as any).id, storeName: (curator as any).storeName })
 
-    // 2) Products + first image
-    const { data: productsRaw } = await s
+    // 2) Products + first image with server-side filtering
+    let q = s
       .from('products')
       .select(`
-        id, title, price, slug, category, isFeatured,
+        id, title, price, slug, category, isFeatured, createdAt,
         product_images!inner (
           url, "order"
         )
       `)
       .eq('curatorId', (curator as any).id)
       .eq('isActive', true)
+
+    // Apply filters server-side
+    const { category, min, max, sort } = searchParams
+    if (category && category !== 'all') {
+      q = q.eq('category', category)
+    }
+    if (min) q = q.gte('price', Number(min))
+    if (max) q = q.lte('price', Number(max))
+
+    // Apply sorting
+    if (sort === 'price-asc') q = q.order('price', { ascending: true })
+    else if (sort === 'price-desc') q = q.order('price', { ascending: false })
+    else q = q.order('createdAt', { ascending: false })
+
+    const { data: productsRaw } = await q
 
     const products: ProductCardData[] =
       ((productsRaw as any[]) || []).map((p: any) => ({
@@ -134,25 +152,31 @@ export default async function CuratorPage({
           (Array.isArray(p.product_images) && p.product_images[0]?.url) || null,
       })) ?? []
 
-    // 3) Category counts
-    const categoriesMap = new Map<string, number>()
-    for (const p of (productsRaw as any[]) || []) {
-      const name = p.category || "Other"
-      categoriesMap.set(name, (categoriesMap.get(name) || 0) + 1)
-    }
-    const categories: Category[] = Array.from(categoriesMap.entries()).map(([name, count]) => ({ name, count }))
+    // 3) Category counts from database view (more efficient)
+    let categories: Category[] = []
+    try {
+      const { data: counts } = await s
+        .from('v_curator_category_counts')
+        .select('category, count')
+        .eq('curatorId', (curator as any).id)
 
-    // 4) Filter in-memory for now (DB filter can come later)
-    let filtered = [...products]
-    const { category, min, max, sort } = searchParams
-    if (category && category !== "all") {
-      filtered = filtered.filter((p) => (productsRaw as any[] || []).find((x: any) => x.id === p.id)?.category === category)
+      categories = (counts as any[] || []).map((c: any) => ({
+        name: c.category || "Other",
+        count: c.count || 0
+      }))
+    } catch (error) {
+      // Fallback to in-memory calculation if view doesn't exist
+      console.warn('[curator] Category view not found, using fallback calculation:', error)
+      const categoriesMap = new Map<string, number>()
+      for (const p of (productsRaw as any[]) || []) {
+        const name = p.category || "Other"
+        categoriesMap.set(name, (categoriesMap.get(name) || 0) + 1)
+      }
+      categories = Array.from(categoriesMap.entries()).map(([name, count]) => ({ name, count }))
     }
-    if (min) filtered = filtered.filter((p) => p.price >= Number(min))
-    if (max) filtered = filtered.filter((p) => p.price <= Number(max))
-    if (sort === "price-asc") filtered.sort((a, b) => a.price - b.price)
-    if (sort === "price-desc") filtered.sort((a, b) => b.price - a.price)
-    if (sort === "new") filtered = filtered // assume default order is createdAt desc in DB; can add later
+
+    // Products are already filtered and sorted by the server query
+    const filtered = products
 
     const description = (curator as any).bio || `Discover unique fashion curated by ${(curator as any).storeName}`
     const imageUrl = (curator as any).bannerImage || ''
@@ -181,7 +205,7 @@ export default async function CuratorPage({
               bannerImage: (curator as any).bannerImage || null,
               isEditorsPick: (curator as any).isEditorsPick || false,
               slug: (curator as any).slug,
-              avatarUrl: null, // optional: join users.image if you want
+              avatarUrl: (curator as any).user?.image || null,
             }}
           />
 
