@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { signIn, signOut, useSession } from 'next-auth/react'
 import { User, ChevronDown, LogOut, Heart, ShoppingBag, Settings } from 'lucide-react'
 import Logo from './Logo'
 import SearchBar from './SearchBar'
@@ -191,13 +191,13 @@ export default function Header() {
                   )}
                 </div>
               ) : (
-                <Link
-                  href="/auth/signin"
+                <button
+                  onClick={() => signIn("google", { callbackUrl: "/account" })}
                   className="flex items-center space-x-2 text-carbon hover:text-black transition-colors duration-200"
                 >
                   <User className="w-5 h-5" />
                   <span className="hidden sm:inline font-medium">Sign In</span>
-                </Link>
+                </button>
               )}
             </div>
           </div>

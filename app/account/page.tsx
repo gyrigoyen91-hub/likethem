@@ -1,8 +1,11 @@
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth"
+import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import AccountClient from './AccountClient'
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AccountPage() {
   const session = await getServerSession(authOptions)
@@ -39,4 +42,4 @@ export default async function AccountPage() {
   }
 
   return <AccountClient user={user} session={session} />
-}
+} 
