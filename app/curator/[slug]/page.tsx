@@ -80,29 +80,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
       .from('curator_profiles')
       .select(`
         *,
-        user:users(id, fullName, avatar),
-        products:products!curatorId(
-          id,
-          title,
-          description,
-          price,
-          category,
-          tags,
-          sizes,
-          colors,
-          stockQuantity,
-          isFeatured,
-          curatorNote,
-          slug,
-          createdAt,
-          updatedAt,
-          images:product_images(
-            id,
-            url,
-            altText,
-            order
-          )
-        )
+        user:users(id, fullName, avatar)
       `)
       .or(`id.eq.${slug},slug.eq.${slug}`)
       .eq('isPublic', true)
@@ -119,13 +97,30 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
       notFound()
     }
 
+    console.log('[curator-page] curator =', curator?.id, curator?.slug, curator?.isPublic);
+
+    // Use a single query that SELECTs the image relation inline so we don't need a separate join in code:
+    const { data: items, error: itemsErr } = await supabase
+      .from('products')
+      .select(`
+        id, title, price, category, sizes, colors,
+        "isActive", "stockQuantity", "createdAt",
+        product_images ( url, altText, "order" )
+      `)
+      .eq('curatorId', curator.id)
+      .eq('"isActive"', true)
+      .gt('"stockQuantity"', 0)
+      .order('"createdAt"', { ascending: false });
+
+    console.log('[curator-page] items count =', items?.length, 'error =', itemsErr);
+
     // Filter active products and sort by creation date
-    const activeProducts = curator.products
+    const activeProducts = items
       ?.filter((product: any) => product.isActive)
       ?.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       ?.map((product: any) => ({
         ...product,
-        images: product.images?.sort((a: any, b: any) => a.order - b.order) || []
+        images: product.product_images?.sort((a: any, b: any) => a.order - b.order) || []
       })) || []
 
     console.log('[curator][page] Found curator:', { 
@@ -176,18 +171,24 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
       productCount: activeProducts.length 
     })
 
+    // Temporary JSON return to debug items
     return (
-      <>
-        <CuratorSEO
-          name={curator.storeName}
-          description={description}
-          image={imageUrl || undefined}
-          slug={curator.slug}
-        />
-        
-        <CuratorDetailClient curator={transformedCurator} />
-      </>
+      <pre>{JSON.stringify({ items, activeProducts }, null, 2)}</pre>
     )
+
+    // Original return (commented out for debugging)
+    // return (
+    //   <>
+    //     <CuratorSEO
+    //       name={curator.storeName}
+    //       description={description}
+    //       image={imageUrl || undefined}
+    //       slug={curator.slug}
+    //     />
+        
+    //     <CuratorDetailClient curator={transformedCurator} />
+    //   </>
+    // )
   } catch (error) {
     console.error('[curator][page] Error loading curator:', error)
     notFound()
