@@ -5,6 +5,9 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 
 // Ensure Node runtime (not Edge) so server env vars are available
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+console.log('[debug/curator] route loaded');
 
 export async function GET(
   _req: Request,
@@ -78,6 +81,7 @@ export async function GET(
     }
 
     console.log('[debug/curator] result:', { data, error });
+    console.log('[debug/curator] returning response', { idOrSlug, data, error });
 
     if (!data) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
