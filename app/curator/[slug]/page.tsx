@@ -4,6 +4,10 @@ import { CuratorSEO } from '@/components/SEO'
 import { CuratorImage } from '@/components/OptimizedImage'
 import CuratorDetailClient from '@/components/CuratorDetailClient'
 
+// Make the route dynamic to prevent caching 404s for newly created curators
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const parseIdOrSlug = (param: string) => {
   const n = Number(param)
   const numericId = Number.isFinite(n) && String(n) === param ? n : undefined
@@ -13,12 +17,6 @@ const parseIdOrSlug = (param: string) => {
 
 interface CuratorPageProps {
   params: { slug: string }
-}
-
-export async function generateStaticParams() {
-  // Return empty array to prevent build-time database access
-  // Pages will be generated dynamically at runtime
-  return []
 }
 
 export async function generateMetadata({ params }: CuratorPageProps) {
@@ -115,6 +113,12 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
       notFound()
     }
 
+    // Check if curator is public - if not, return 404
+    if (!curator.isPublic) {
+      console.log('[curator][page] Curator is not public:', { id: curator.id, isPublic: curator.isPublic })
+      notFound()
+    }
+
     // Filter active products and sort by creation date
     const activeProducts = curator.products
       ?.filter((product: any) => product.isActive)
@@ -127,7 +131,8 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
     console.log('[curator][page] Found curator:', { 
       id: curator.id, 
       storeName: curator.storeName, 
-      productCount: activeProducts.length 
+      productCount: activeProducts.length,
+      isPublic: curator.isPublic
     })
 
     // Canonical redirect: if accessed via ID/UUID and has slug, redirect to slug URL

@@ -1,15 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/auth'
-import { prisma } from '@/lib/prisma'
-import { serializePrisma } from '@/lib/serialize'
-
-const parseIdOrSlug = (param: string) => {
-  const n = Number(param)
-  const numericId = Number.isFinite(n) && String(n) === param ? n : undefined
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(param)
-  return { numericId, isUuid, slug: param }
-}
+import { supabase } from '@/lib/supabase'
 
 export async function GET(
   request: Request,
@@ -30,80 +22,75 @@ export async function GET(
       }
     }
 
-    const { numericId, isUuid, slug } = parseIdOrSlug(params.idOrSlug)
-    
-    console.log('[debug][curator] Parsed params:', { numericId, isUuid, slug, original: params.idOrSlug })
+    console.log('[debug][curator] Looking up curator:', { idOrSlug: params.idOrSlug })
 
-    const curator = await prisma.curatorProfile.findFirst({
-      where: {
-        OR: [
-          ...(isUuid ? [{ id: slug }] : []),
-          { slug },
-        ]
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            fullName: true,
-            avatar: true
-          }
-        },
-        products: {
-          where: { isActive: true },
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            price: true,
-            category: true,
-            tags: true,
-            sizes: true,
-            colors: true,
-            stockQuantity: true,
-            isFeatured: true,
-            curatorNote: true,
-            slug: true,
-            createdAt: true,
-            updatedAt: true,
-            images: {
-              select: {
-                id: true,
-                url: true,
-                altText: true,
-                order: true
-              },
-              orderBy: { order: 'asc' }
-            }
-          },
-          orderBy: { createdAt: 'desc' }
-        }
-      }
-    })
+    const { data, error } = await supabase
+      .from('curator_profiles')
+      .select(`
+        *,
+        user:users(id, fullName, avatar),
+        products:products!curatorId(
+          id,
+          title,
+          description,
+          price,
+          category,
+          tags,
+          sizes,
+          colors,
+          stockQuantity,
+          isFeatured,
+          curatorNote,
+          slug,
+          createdAt,
+          updatedAt,
+          isActive,
+          images:product_images(
+            id,
+            url,
+            altText,
+            order
+          )
+        )
+      `)
+      .or(`id.eq.${params.idOrSlug},slug.eq.${params.idOrSlug}`)
+      .eq('isPublic', true)
+      .single()
 
-    if (!curator) {
-      return NextResponse.json({ 
-        error: 'Curator not found',
-        params: { numericId, isUuid, slug, original: params.idOrSlug }
-      }, { status: 404 })
+    if (error || !data) {
+      console.log('[debug][curator] Curator not found:', { error, idOrSlug: params.idOrSlug })
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
-    // Serialize the response to handle BigInt/Decimal issues
-    const safeCurator = serializePrisma(curator)
+    // Filter active products and sort by creation date
+    const activeProducts = data.products
+      ?.filter((product: any) => product.isActive)
+      ?.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      ?.map((product: any) => ({
+        ...product,
+        images: product.images?.sort((a: any, b: any) => a.order - b.order) || []
+      })) || []
+
+    console.log('[debug][curator] Found curator:', { 
+      id: data.id, 
+      storeName: data.storeName, 
+      productCount: activeProducts.length,
+      isPublic: data.isPublic
+    })
 
     return NextResponse.json({ 
-      curator: safeCurator,
-      params: { numericId, isUuid, slug, original: params.idOrSlug },
-      isPublic: curator.isPublic,
-      productCount: curator.products.length
+      found: true, 
+      data: {
+        ...data,
+        products: activeProducts
+      }
     })
 
   } catch (error) {
     console.error('[debug][curator] Error:', error)
     return NextResponse.json({ 
       error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      params: { original: params.idOrSlug }
+      message: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }
