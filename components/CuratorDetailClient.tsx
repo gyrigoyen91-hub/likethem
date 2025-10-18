@@ -214,8 +214,26 @@ export default function CuratorDetailClient({ curator }: CuratorDetailClientProp
         </h2>
 
         {curator.products.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No products available yet.</p>
+          <div className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-medium text-gray-900 mb-2">This curator hasn't added any items yet</h3>
+              <p className="text-gray-500 mb-6">
+                {curator.storeName} is carefully curating their collection. Check back soon for amazing fashion finds!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button className="px-6 py-2 bg-carbon text-white hover:bg-gray-800 transition-colors rounded-md">
+                  Follow for Updates
+                </button>
+                <button className="px-6 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded-md">
+                  Browse Other Curators
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

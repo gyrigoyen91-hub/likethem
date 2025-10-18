@@ -1,6 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
-import { serializePrisma } from '@/lib/serialize'
+import { supabase } from '@/lib/supabase'
 import { CuratorSEO } from '@/components/SEO'
 import { CuratorImage } from '@/components/OptimizedImage'
 import CuratorDetailClient from '@/components/CuratorDetailClient'
@@ -27,23 +26,18 @@ export async function generateMetadata({ params }: CuratorPageProps) {
     const { numericId, isUuid, slug } = parseIdOrSlug(params.slug)
     console.log('[curator][metadata] Parsed params:', { numericId, isUuid, slug, original: params.slug })
 
-    const curator = await prisma.curatorProfile.findFirst({
-      where: {
-        OR: [
-          ...(isUuid ? [{ id: slug }] : []),
-          { slug },
-        ]
-      },
-      include: {
-        user: {
-          select: {
-            fullName: true
-          }
-        }
-      }
-    })
+    const { data: curator, error } = await supabase
+      .from('curator_profiles')
+      .select(`
+        *,
+        user:users(fullName)
+      `)
+      .or(`id.eq.${slug},slug.eq.${slug}`)
+      .eq('isPublic', true)
+      .single()
 
-    if (!curator || !curator.isPublic) {
+    if (error || !curator) {
+      console.log('[curator][metadata] Curator not found:', { error, slug })
       return {
         title: 'Curator Not Found',
         description: 'The requested curator could not be found.'
@@ -84,57 +78,57 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
     const { numericId, isUuid, slug } = parseIdOrSlug(params.slug)
     console.log('[curator][page] Parsed params:', { numericId, isUuid, slug, original: params.slug })
 
-    const curator = await prisma.curatorProfile.findFirst({
-      where: {
-        OR: [
-          ...(isUuid ? [{ id: slug }] : []),
-          { slug },
-        ]
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            fullName: true,
-            avatar: true
-          }
-        },
-        products: {
-          where: { isActive: true },
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            price: true,
-            category: true,
-            tags: true,
-            sizes: true,
-            colors: true,
-            stockQuantity: true,
-            isFeatured: true,
-            curatorNote: true,
-            slug: true,
-            createdAt: true,
-            updatedAt: true,
-            images: {
-              select: {
-                id: true,
-                url: true,
-                altText: true,
-                order: true
-              },
-              orderBy: { order: 'asc' }
-            }
-          },
-          orderBy: { createdAt: 'desc' }
-        }
-      }
-    })
+    const { data: curator, error } = await supabase
+      .from('curator_profiles')
+      .select(`
+        *,
+        user:users(id, fullName, avatar),
+        products:products!curatorId(
+          id,
+          title,
+          description,
+          price,
+          category,
+          tags,
+          sizes,
+          colors,
+          stockQuantity,
+          isFeatured,
+          curatorNote,
+          slug,
+          createdAt,
+          updatedAt,
+          images:product_images(
+            id,
+            url,
+            altText,
+            order
+          )
+        )
+      `)
+      .or(`id.eq.${slug},slug.eq.${slug}`)
+      .eq('isPublic', true)
+      .single()
 
-    if (!curator || !curator.isPublic) {
-      console.log('[curator][page] Curator not found or not public:', { slug, isPublic: curator?.isPublic })
+    if (error || !curator) {
+      console.log('[curator][page] Curator not found:', { error, slug })
       notFound()
     }
+
+    // Filter active products and sort by creation date
+    const activeProducts = curator.products
+      ?.filter((product: any) => product.isActive)
+      ?.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      ?.map((product: any) => ({
+        ...product,
+        images: product.images?.sort((a: any, b: any) => a.order - b.order) || []
+      })) || []
+
+    console.log('[curator][page] Found curator:', { 
+      id: curator.id, 
+      storeName: curator.storeName, 
+      productCount: activeProducts.length 
+    })
 
     // Canonical redirect: if accessed via ID/UUID and has slug, redirect to slug URL
     if (curator.slug && (numericId || isUuid) && slug !== curator.slug) {
@@ -153,23 +147,20 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
       twitter: curator.twitter ?? undefined,
       user: {
         ...curator.user,
-        fullName: curator.user.fullName ?? undefined,
-        avatar: curator.user.avatar ?? undefined,
+        fullName: curator.user?.fullName ?? undefined,
+        avatar: curator.user?.avatar ?? undefined,
       },
-      products: curator.products.map(product => ({
+      products: activeProducts.map((product: any) => ({
         ...product,
         curatorNote: product.curatorNote ?? undefined,
-        createdAt: product.createdAt.toISOString(),
-        updatedAt: product.updatedAt.toISOString(),
-        images: product.images.map(image => ({
+        createdAt: new Date(product.createdAt).toISOString(),
+        updatedAt: new Date(product.updatedAt).toISOString(),
+        images: product.images.map((image: any) => ({
           ...image,
           altText: image.altText ?? undefined,
         })),
       })),
     }
-
-    // Serialize to handle any BigInt/Decimal issues
-    const safeCurator = serializePrisma(transformedCurator)
 
     const description = curator.bio || `Discover unique fashion curated by ${curator.storeName}`
     const imageUrl = curator.bannerImage || ''
@@ -177,7 +168,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
     console.log('[curator][page] Successfully loaded curator:', { 
       id: curator.id, 
       storeName: curator.storeName, 
-      productCount: curator.products.length 
+      productCount: activeProducts.length 
     })
 
     return (
@@ -189,7 +180,7 @@ export default async function CuratorPage({ params }: CuratorPageProps) {
           slug={curator.slug}
         />
         
-        <CuratorDetailClient curator={safeCurator} />
+        <CuratorDetailClient curator={transformedCurator} />
       </>
     )
   } catch (error) {
