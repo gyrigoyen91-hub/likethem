@@ -9,7 +9,8 @@ export default withAuth({
 
 export const config = {
   matcher: [
-    "/account",
-    // add: "/dashboard/:path*" if needed later
+    "/account/:path*",
+    "/dashboard/:path*",
+    // Note: Access checks for checkout/cart will be handled in individual pages/API routes
   ],
 }; 

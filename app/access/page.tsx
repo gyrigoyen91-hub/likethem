@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import InviteCodeForm from '@/components/InviteCodeForm'
 
 export default function AccessPage() {
   const [formType, setFormType] = useState<'buy' | 'sell' | null>(null)
@@ -144,44 +145,71 @@ function SellerForm() {
 
 function BuyerForm() {
   return (
-    <form className="space-y-6">
+    <div className="space-y-8">
       <h2 className="font-serif text-3xl font-light mb-8">
         Solicitud de Acceso
       </h2>
       
-      <div>
-        <label className="block text-sm font-medium mb-2">Email</label>
-        <input
-          type="email"
-          className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-          required
-        />
+      {/* Invite Code Section */}
+      <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+        <h3 className="font-semibold text-lg mb-3">Have an access code?</h3>
+        <p className="text-gray-600 text-sm mb-4">
+          Enter a curator access code to unlock purchasing immediately.
+        </p>
+        <InviteCodeForm />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Link a redes sociales (opcional)</label>
-        <input
-          type="url"
-          placeholder="Instagram, TikTok..."
-          className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-        />
+      {/* Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300" />
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-white text-gray-500">or</span>
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Estilo que buscas</label>
-        <select className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon">
-          <option>Minimal</option>
-          <option>Streetwear</option>
-          <option>Vintage</option>
-          <option>Elegante</option>
-          <option>Casual</option>
-          <option>Otro</option>
-        </select>
-      </div>
+      {/* Waitlist Form */}
+      <form className="space-y-6">
+        <h3 className="font-semibold text-lg">Join the waitlist</h3>
+        <p className="text-gray-600 text-sm">
+          Request access to be notified when we have availability.
+        </p>
+        
+        <div>
+          <label className="block text-sm font-medium mb-2">Email</label>
+          <input
+            type="email"
+            className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+            required
+          />
+        </div>
 
-      <button type="submit" className="btn-primary w-full">
-        Solicitar acceso
-      </button>
-    </form>
+        <div>
+          <label className="block text-sm font-medium mb-2">Link a redes sociales (opcional)</label>
+          <input
+            type="url"
+            placeholder="Instagram, TikTok..."
+            className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Estilo que buscas</label>
+          <select className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon">
+            <option>Minimal</option>
+            <option>Streetwear</option>
+            <option>Vintage</option>
+            <option>Elegante</option>
+            <option>Casual</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <button type="submit" className="btn-primary w-full">
+          Solicitar acceso
+        </button>
+      </form>
+    </div>
   )
 } 
