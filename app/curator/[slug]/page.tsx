@@ -7,7 +7,8 @@ import ProductCard, { ProductCardData } from '@/components/curator/ProductCard'
 import EmptyState from '@/components/curator/EmptyState'
 import FiltersSheet from '@/components/curator/FiltersSheet'
 
-// Make the route dynamic to prevent caching 404s for newly created curators
+// Ensure Node.js runtime for Supabase service key access
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
@@ -30,26 +31,42 @@ export async function generateMetadata({ params }: CuratorPageProps) {
     const s = getSupabaseServer()
     const { data: curator, error } = await s
       .from('curator_profiles')
-      .select('id, slug, "isPublic", storeName, bio, bannerImage')
+      .select('*')
       .or(`id.eq.${slug},slug.eq.${slug}`)
-      .eq('isPublic', true)
       .single()
 
-    if (error || !curator) {
-      console.log('[curator][metadata] Curator not found:', { error, slug })
-    return {
-      title: 'Curator Not Found',
-      description: 'The requested curator could not be found.'
+    if (error) {
+      console.error('[curator][metadata] error', error)
+      return {
+        title: 'Curator Not Found',
+        description: 'The requested curator could not be found.'
+      }
     }
-  }
+
+    if (!curator) {
+      console.log('[curator][metadata] Curator not found for slug:', slug)
+      return {
+        title: 'Curator Not Found',
+        description: 'The requested curator could not be found.'
+      }
+    }
+
+    // Only gate on isPublic === false
+    if ((curator as any).isPublic === false) {
+      console.log('[curator][metadata] Curator is not public:', { id: (curator as any).id, isPublic: (curator as any).isPublic })
+      return {
+        title: 'Curator Not Found',
+        description: 'The requested curator could not be found.'
+      }
+    }
 
     const description = (curator as any).bio || `Discover unique fashion curated by ${(curator as any).storeName}`
     const imageUrl = (curator as any).bannerImage || ''
 
   return {
       title: `${(curator as any).storeName} - Curator`,
-      description: description.substring(0, 160),
-      openGraph: {
+    description: description.substring(0, 160),
+    openGraph: {
         title: `${(curator as any).storeName} - Curator`,
       description: description.substring(0, 160),
       images: imageUrl ? [imageUrl] : [],
@@ -92,26 +109,31 @@ export default async function CuratorPage({
 
     const s = getSupabaseServer()
     
-    // 1) Curator with user avatar
+    // 1) Fetch curator allowing id OR slug
     const { data: curator, error: curatorError } = await s
       .from('curator_profiles')
-      .select(`
-        id, storeName, bio, bannerImage, isEditorsPick, slug, "isPublic",
-        user:users(image)
-      `)
+      .select('*')
       .or(`slug.eq.${slug},id.eq.${slug}`)
-      .maybeSingle()
+      .single()
 
-    if (curatorError || !curator) {
-      console.log('[curator][page] Curator not found:', { error: curatorError, slug })
+    if (curatorError) {
+      console.error('[curator/page] error', curatorError)
+      notFound()
+    }
+    
+    if (!curator) {
+      console.log('[curator/page] Curator not found for slug:', slug)
     notFound()
   }
 
-    // treat isPublic === false as private; null/true are visible
+    // Only gate on isPublic === false
     if ((curator as any).isPublic === false) {
-      console.log('[curator][page] Curator is not public:', { id: (curator as any).id, isPublic: (curator as any).isPublic })
+      console.log('[curator/page] Curator is not public:', { id: (curator as any).id, isPublic: (curator as any).isPublic })
       notFound()
     }
+
+    console.log('[curator/page] params.slug =', params.slug)
+    console.log('[curator/page] curator =', (curator as any)?.id, (curator as any)?.slug, (curator as any)?.isPublic)
 
     console.log('[curator][page] Found curator:', { id: (curator as any).id, storeName: (curator as any).storeName })
 
