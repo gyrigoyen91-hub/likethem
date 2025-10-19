@@ -12,7 +12,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-2">
-            <Logo size="lg" variant="inverted" className="mb-4" />
+            <div className="mb-4">
+              <Logo />
+            </div>
             <p className="text-gray-300 text-sm leading-relaxed mb-6 max-w-md">
               The exclusive platform where influencers curate their fashion stores. 
               Dress like the ones you admire.

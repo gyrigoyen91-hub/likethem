@@ -17,7 +17,7 @@ export default function LogoShowcase() {
             <h3 className="font-serif text-2xl font-light">In Navbar</h3>
             <div className="border border-gray-200 rounded-lg p-6 bg-white">
               <div className="flex items-center justify-between">
-                <Logo size="md" />
+                <Logo />
                 <div className="flex space-x-4 text-sm text-gray-600">
                   <span>Dress Like Them</span>
                   <span>Sell Like Them</span>
@@ -32,7 +32,7 @@ export default function LogoShowcase() {
             <h3 className="font-serif text-2xl font-light">Mobile Header</h3>
             <div className="border border-gray-200 rounded-lg p-4 bg-white max-w-sm">
               <div className="flex items-center justify-between">
-                <Logo size="sm" />
+                <Logo />
                 <div className="w-6 h-6 bg-gray-300 rounded"></div>
               </div>
             </div>
@@ -42,7 +42,9 @@ export default function LogoShowcase() {
           <div className="space-y-6">
             <h3 className="font-serif text-2xl font-light">Centered on Homepage</h3>
             <div className="border border-gray-200 rounded-lg p-12 bg-white text-center">
-              <Logo size="xl" className="mb-4" />
+              <div className="mb-4">
+                <Logo />
+              </div>
               <p className="text-gray-600">Hero section placement</p>
             </div>
           </div>
@@ -53,7 +55,7 @@ export default function LogoShowcase() {
             <div className="border border-gray-200 rounded-lg p-6 bg-white">
               <div className="flex items-center space-x-4">
                 <Favicon size={24} />
-                <Logo size="sm" />
+                <Logo />
               </div>
               <p className="text-xs text-gray-500 mt-2">Product tags and packaging</p>
             </div>
@@ -76,7 +78,7 @@ export default function LogoShowcase() {
           <div className="space-y-6">
             <h3 className="font-serif text-2xl font-light">Inverted on Dark</h3>
             <div className="border border-gray-200 rounded-lg p-6 bg-carbon">
-              <Logo size="lg" variant="inverted" />
+              <Logo />
               <p className="text-white/60 text-xs mt-2">Footer and dark contexts</p>
             </div>
           </div>
