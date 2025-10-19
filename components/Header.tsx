@@ -1,60 +1,50 @@
-"use client";
-
 import Link from "next/link";
-import { useSession, signIn, signOut } from "next-auth/react";
 import Logo from "@/components/Logo";
 import UserChip from "@/components/UserChip";
+import HeaderSearchBar from "@/components/HeaderSearchBar";
+import CartButton from "@/components/CartButton";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-const navLink =
-  "px-3 py-2 text-sm font-medium text-gray-700 transition hover:text-black hover:underline underline-offset-4";
-
-export default function Header() {
-  const { data: session, status } = useSession();
+export default async function Header() {
+  const session = await getServerSession(authOptions);
   const user = session?.user;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-gray-100 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70">
-      <div className="mx-auto grid h-16 max-w-7xl grid-cols-3 items-center px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-14 grid grid-cols-[1fr_auto_1fr] items-center">
         {/* Left: Logo */}
         <div className="justify-self-start">
           <Logo />
         </div>
 
         {/* Center: Nav */}
-        <nav
-          className="pointer-events-auto flex items-center justify-center gap-2 sm:gap-4"
-          aria-label="Primary"
-        >
-          <Link href="/explore" className={navLink}>
-            Dress Like Them
-          </Link>
-          <Link href="/sell" className={navLink}>
-            Sell Like Them
-          </Link>
+        <nav className="justify-self-center">
+          <ul className="flex items-center gap-10 text-sm">
+            <li>
+              <Link
+                href="/explore"
+                className="text-gray-700 hover:text-black hover:underline underline-offset-4 transition-colors"
+              >
+                Dress Like Them
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/sell"
+                className="text-gray-700 hover:text-black hover:underline underline-offset-4 transition-colors"
+              >
+                Sell Like Them
+              </Link>
+            </li>
+          </ul>
         </nav>
 
-        {/* Right: Auth */}
-        <div className="flex items-center justify-self-end gap-3">
-          {status === "loading" ? null : user ? (
-            <>
-              <Link href="/account" className="flex items-center">
-                <UserChip name={user.name ?? user.fullName} image={user.image ?? null} />
-              </Link>
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="text-sm text-gray-600 transition hover:text-black"
-              >
-                Sign Out
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => signIn("google", { callbackUrl: "/account" })}
-              className="text-sm font-medium text-gray-700 transition hover:text-black"
-            >
-              Sign In
-            </button>
-          )}
+        {/* Right: Search, Cart, Account */}
+        <div className="justify-self-end flex items-center gap-4">
+          <HeaderSearchBar />
+          <CartButton />
+          <UserChip user={user ?? null} />
         </div>
       </div>
     </header>
