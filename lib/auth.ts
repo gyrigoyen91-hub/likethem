@@ -1,4 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { type NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -10,6 +11,19 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true,
+    }),
+    CredentialsProvider({
+      name: "Email & Password",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        // TODO: Wire to Supabase users/password hash
+        // For now, return null to disable credentials
+        return null;
+      },
     }),
   ],
   session: { strategy: "jwt" },

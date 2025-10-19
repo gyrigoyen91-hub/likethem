@@ -14,7 +14,7 @@ export default function UserChip({ user }: { user: User | null }) {
   if (!user) {
     return (
       <button
-        onClick={() => signIn("google", { callbackUrl: "/account" })}
+        onClick={() => signIn(undefined, { callbackUrl: "/account" })}
         className="text-sm text-gray-700 hover:text-black hover:underline underline-offset-4 transition-colors"
       >
         Sign In
