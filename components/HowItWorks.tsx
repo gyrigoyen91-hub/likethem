@@ -1,70 +1,85 @@
-'use client'
-
-import { motion } from 'framer-motion'
-import { Search, ShoppingBag, Star } from 'lucide-react'
-
-const steps = [
-  {
-    icon: Search,
-    title: 'Find Your Favorite Influencer',
-    description: 'Explore curated stores by the content creators you admire'
-  },
-  {
-    icon: ShoppingBag,
-    title: 'Shop What They Wear',
-    description: 'Discover the exact pieces they wear in their most iconic looks'
-  },
-  {
-    icon: Star,
-    title: 'Wear It Like Them',
-    description: 'Recreate their style with the same pieces that define their aesthetic'
-  }
-]
+'use client';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 export default function HowItWorks() {
+  const steps = [
+    {
+      icon: '🌀',
+      title: 'Scroll',
+      description:
+        'Find your style inspiration as you scroll your feed. Discover creators whose fashion reflects your vibe.',
+    },
+    {
+      icon: '🛍️',
+      title: 'Shop',
+      description:
+        'Tap and shop the exact pieces they wear — every item is verified and curated directly from the influencer\'s closet.',
+    },
+    {
+      icon: '✨',
+      title: 'Wear',
+      description:
+        'Recreate their look and make it yours. Express your individuality with the same timeless pieces they love.',
+    },
+  ];
+
   return (
-    <section className="py-24 bg-stone">
-      <div className="container-custom">
+    <section className="relative w-full bg-[#FAFAFA] py-20 sm:py-28">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row lg:gap-24">
+        {/* LEFT: Image */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="relative w-full max-w-lg overflow-hidden rounded-3xl shadow-sm"
         >
-          <h2 className="font-serif text-4xl md:text-5xl font-light mb-6">
-            How It Works
-          </h2>
-          <p className="text-lg text-warm-gray max-w-2xl mx-auto font-light">
-            Three simple steps to dress like the ones you admire
-          </p>
+          <Image
+            src="/images/how-it-works.jpg"
+            alt="Person holding phone showing outfit inspiration"
+            width={1000}
+            height={800}
+            className="h-auto w-full object-cover"
+            priority
+          />
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {steps.map((step, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <div className="w-16 h-16 mx-auto mb-6 bg-carbon text-white rounded-full flex items-center justify-center">
-                <step.icon className="w-8 h-8" />
+        {/* RIGHT: Text content */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15 }}
+          viewport={{ once: true }}
+          className="flex w-full flex-col items-start text-center lg:text-left"
+        >
+          <h2 className="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl font-serif">
+            How It Works
+          </h2>
+          <p className="mt-2 text-lg text-gray-600">
+            Your style inspiration, made shoppable.
+          </p>
+          <p className="mt-1 text-base text-gray-400">
+            Three effortless steps to dress like the ones you admire.
+          </p>
+
+          <div className="mt-10 flex w-full flex-col gap-6 sm:gap-8">
+            {steps.map((step) => (
+              <div key={step.title} className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black text-2xl text-white">
+                  {step.icon}
+                </div>
+                <div>
+                  <h3 className="text-xl font-medium text-gray-900">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1 text-gray-500">{step.description}</p>
+                </div>
               </div>
-              
-              <h3 className="font-serif text-2xl font-light mb-4">
-                {step.title}
-              </h3>
-              
-              <p className="text-warm-gray text-base leading-relaxed">
-                {step.description}
-              </p>
-            </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
-  )
+  );
 } 

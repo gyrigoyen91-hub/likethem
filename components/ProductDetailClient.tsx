@@ -43,9 +43,11 @@ interface Product {
 
 interface ProductDetailClientProps {
   product: Product
+  hasAccess?: boolean
+  isInnerTier?: boolean
 }
 
-export default function ProductDetailClient({ product }: ProductDetailClientProps) {
+export default function ProductDetailClient({ product, hasAccess = true, isInnerTier = false }: ProductDetailClientProps) {
   const { data: session, status } = useSession()
   const { addItem } = useCart()
   const [selectedImage, setSelectedImage] = useState(0)
@@ -292,10 +294,32 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <h1 className="font-serif text-3xl md:text-4xl font-light text-gray-900 mb-2">
                 {product.title}
               </h1>
-              <p className="text-2xl font-semibold text-gray-900">
-                ${product.price.toFixed(2)}
-              </p>
+              {isInnerTier && !hasAccess ? (
+                <div className="flex items-center gap-2">
+                  <p className="text-2xl font-semibold text-gray-400 blur-sm">
+                    ${product.price.toFixed(2)}
+                  </p>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                    Hidden
+                  </span>
+                </div>
+              ) : (
+                <p className="text-2xl font-semibold text-gray-900">
+                  ${product.price.toFixed(2)}
+                </p>
+              )}
             </div>
+
+            {/* Inner Tier Badge */}
+            {isInnerTier && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
+                  Inner Closet
+                </span>
+                <span className="text-gray-500">•</span>
+                <span>Members only</span>
+              </div>
+            )}
 
             {/* Curator Note */}
             {product.curatorNote && (
@@ -351,32 +375,53 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             )}
 
             {/* Add to Cart Button */}
-            <button
-              onClick={handleAddToCart}
-              disabled={isAddingToCart}
-              className={`w-full py-4 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                showAddedFeedback
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-900 text-white hover:bg-gray-800 disabled:bg-gray-400'
-              }`}
-            >
-              {isAddingToCart ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Adding...
-                </>
-              ) : showAddedFeedback ? (
-                <>
+            {isInnerTier && !hasAccess ? (
+              <div className="space-y-3">
+                <button
+                  disabled
+                  className="w-full py-4 px-6 rounded-lg font-medium bg-gray-100 text-gray-400 cursor-not-allowed flex items-center justify-center gap-2"
+                >
                   <ShoppingCart className="w-5 h-5" />
-                  Added to Cart!
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-5 h-5" />
-                  Add to Cart
-                </>
-              )}
-            </button>
+                  Members Only
+                </button>
+                <button
+                  onClick={() => {
+                    // This will be handled by the AccessModal
+                    window.location.href = '/access?need=code';
+                  }}
+                  className="w-full py-2 px-4 rounded-lg font-medium bg-black text-white hover:bg-gray-800 transition-colors"
+                >
+                  Have a code? Unlock access
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleAddToCart}
+                disabled={isAddingToCart}
+                className={`w-full py-4 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                  showAddedFeedback
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-900 text-white hover:bg-gray-800 disabled:bg-gray-400'
+                }`}
+              >
+                {isAddingToCart ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Adding...
+                  </>
+                ) : showAddedFeedback ? (
+                  <>
+                    <ShoppingCart className="w-5 h-5" />
+                    Added to Cart!
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="w-5 h-5" />
+                    Add to Cart
+                  </>
+                )}
+              </button>
+            )}
 
             {/* Product Description */}
             <div>

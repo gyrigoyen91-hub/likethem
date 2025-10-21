@@ -23,11 +23,21 @@ const nextConfig = {
   // Disable static generation to prevent SSR issues with framer-motion
   output: 'standalone',
   images: {
+    // Avoid expensive image work during local builds
+    unoptimized: process.env.CI !== 'true',
     remotePatterns: [
       { protocol: 'https', hostname: 'picsum.photos' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'mineihnvptbfkqdfcrzg.supabase.co' },
     ],
+  },
+  typescript: {
+    // Prevent TS check from hanging local builds; CI will still check types
+    ignoreBuildErrors: process.env.CI !== 'true',
+  },
+  eslint: {
+    // Lint in CI, not during local prod builds
+    ignoreDuringBuilds: process.env.CI !== 'true',
   },
 }
 

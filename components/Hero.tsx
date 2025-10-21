@@ -2,17 +2,20 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Hero() {
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image - High-end Editorial Style */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")'
-        }}
-      >
+      <div className="absolute inset-0">
+        <Image
+          src="/images/hero/banner-home.jpg"
+          alt="LikeThem — Curated fashion by top influencers"
+          fill
+          className="object-cover object-center"
+          priority
+        />
         <div className="absolute inset-0 bg-black/15"></div>
       </div>
       
@@ -24,11 +27,11 @@ export default function Hero() {
           transition={{ duration: 0.8 }}
         >
           <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-light mb-6 tracking-wide uppercase">
-            Where Fashion Meets Influence.
+            From your feed to your closet.
           </h1>
           
           <p className="text-lg md:text-xl text-white/90 mb-12 max-w-2xl mx-auto font-light">
-            Not everyone can sell here. Not everyone can shop here.
+            Curated fashion by top influencers. Exclusive access to the pieces that matter.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -45,7 +48,7 @@ export default function Hero() {
               transition={{ duration: 0.2 }}
             >
               <Link href="/access" className="inline-block bg-white text-black border border-white px-8 py-4 font-medium tracking-wider uppercase text-sm hover:bg-gray-100 transition-colors duration-200">
-                Request Access
+                Apply to Sell
               </Link>
             </motion.div>
           </div>
