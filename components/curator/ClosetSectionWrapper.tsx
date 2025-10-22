@@ -26,6 +26,7 @@ interface ClosetSectionWrapperProps {
   tier: 'PUBLIC' | 'INNER' | 'DROP';
   curatorId: string;
   curatorName: string;
+  curatorSlug: string; // Add curator slug for canonical routing
   hasAccess: boolean;
   activeDrop?: ActiveDrop | null;
   products: Product[];
@@ -37,6 +38,7 @@ export default async function ClosetSectionWrapper({
   tier,
   curatorId,
   curatorName,
+  curatorSlug,
   hasAccess,
   activeDrop,
   products,
@@ -65,6 +67,7 @@ export default async function ClosetSectionWrapper({
       tier={tier}
       curatorId={curatorId}
       curatorName={curatorName}
+      curatorSlug={curatorSlug}
       hasAccess={hasAccess}
       activeDrop={activeDrop}
       products={filteredProducts}

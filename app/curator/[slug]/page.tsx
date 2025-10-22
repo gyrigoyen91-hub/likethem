@@ -296,6 +296,7 @@ export default async function CuratorPage({
               tier={tab === 'general' ? 'PUBLIC' : tab === 'inner' ? 'INNER' : 'DROP'}
               curatorId={(curator as any).id}
               curatorName={(curator as any).storeName}
+              curatorSlug={(curator as any).slug}
               hasAccess={hasAccess}
               activeDrop={activeDrop.data}
               products={products}

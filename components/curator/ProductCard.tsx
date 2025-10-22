@@ -10,10 +10,17 @@ export type ProductCardData = {
   isFeatured?: boolean;
   createdAt?: string;
   category?: string | null;
+  curatorSlug?: string; // Add curator slug for canonical routing
 };
 
 export default function ProductCard({ product }: { product: ProductCardData }) {
-  const href = product.slug ? `/product/${product.slug}` : "#";
+  // Use canonical route if curator slug is available, otherwise fall back to short route
+  const href = product.slug 
+    ? (product.curatorSlug 
+        ? `/curator/${product.curatorSlug}/product/${product.slug}` 
+        : `/product/${product.slug}`)
+    : "#";
+    
   return (
     <Link
       href={href}

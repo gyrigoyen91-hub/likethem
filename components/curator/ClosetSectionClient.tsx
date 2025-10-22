@@ -35,6 +35,7 @@ interface ClosetSectionClientProps {
   tier: 'PUBLIC' | 'INNER' | 'DROP';
   curatorId: string;
   curatorName: string;
+  curatorSlug: string; // Add curator slug for canonical routing
   hasAccess: boolean;
   activeDrop?: ActiveDrop | null;
   products: Product[];
@@ -46,6 +47,7 @@ export default function ClosetSectionClient({
   tier,
   curatorId,
   curatorName,
+  curatorSlug,
   hasAccess,
   activeDrop,
   products,
@@ -69,7 +71,7 @@ export default function ClosetSectionClient({
         {products.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-8">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={{ ...product, curatorSlug }} />
             ))}
           </div>
         ) : (
@@ -113,7 +115,7 @@ export default function ClosetSectionClient({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-8">
             {products.map((product) =>
               hasAccess ? (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={{ ...product, curatorSlug }} />
               ) : (
                 <ProductCardLocked 
                   key={product.id} 
@@ -143,7 +145,7 @@ export default function ClosetSectionClient({
       {products.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-8">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={{ ...product, curatorSlug }} />
           ))}
         </div>
       ) : (
