@@ -25,13 +25,13 @@ const parseIdOrSlug = (param: string) => {
 }
 
 interface CuratorPageProps {
-  params: { slug: string }
+  params: { curatorSlug: string }
 }
 
 export async function generateMetadata({ params }: CuratorPageProps) {
   try {
-    const { numericId, isUuid, slug } = parseIdOrSlug(params.slug)
-    console.log('[curator][metadata] Parsed params:', { numericId, isUuid, slug, original: params.slug })
+    const { numericId, isUuid, slug } = parseIdOrSlug(params.curatorSlug)
+    console.log('[curator][metadata] Parsed params:', { numericId, isUuid, slug, original: params.curatorSlug })
 
     const s = getSupabaseServer()
     const { data: curator, error } = await s
@@ -112,11 +112,11 @@ export default async function CuratorPage({
   searchParams: Search; 
 }) {
   try {
-    const { numericId, isUuid, slug } = parseIdOrSlug(params.slug)
+    const { numericId, isUuid, slug } = parseIdOrSlug(params.curatorSlug)
     const tab = searchParams.t || searchParams.tab || 'general'
     const selectedCategory = searchParams.cat || searchParams.category || null
     console.log('[curator:slug] incoming', slug)
-    console.log('[curator][page] Parsed params:', { numericId, isUuid, slug, original: params.slug, tab, selectedCategory })
+    console.log('[curator][page] Parsed params:', { numericId, isUuid, slug, original: params.curatorSlug, tab, selectedCategory })
 
     let curator: any = null
     let useMockData = false
