@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import UserChip from "@/components/UserChip";
-import HeaderSearchBar from "@/components/HeaderSearchBar";
+import HeaderSearch from "@/components/search/HeaderSearch";
 import CartButton from "@/components/CartButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -35,7 +35,7 @@ export default async function Header() {
         <div className="flex items-center justify-end gap-4">
           {/* Desktop search */}
           <div className="hidden md:block">
-            <HeaderSearchBar />
+            <HeaderSearch />
           </div>
 
           <CartButton />
