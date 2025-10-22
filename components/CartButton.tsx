@@ -1,47 +1,52 @@
 "use client";
-import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
+import MiniCart from "@/components/cart/MiniCart";
 import { useCart } from "@/contexts/CartContext";
 import { ShoppingBag } from "lucide-react";
-import { useState, useEffect } from "react";
-import AccessModal from "./AccessModal";
 
 export default function CartButton() {
+  const [open, setOpen] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
   const { getItemCount } = useCart();
   const itemCount = getItemCount();
-  const [showAccessModal, setShowAccessModal] = useState(false);
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const anchorId = "header-cart-button";
 
+  // Close on outside click
   useEffect(() => {
-    // Check if user has access
-    const checkAccess = async () => {
-      try {
-        const response = await fetch('/api/access/check');
-        const data = await response.json();
-        setHasAccess(data.hasAccess);
-      } catch (error) {
-        console.error('Error checking access:', error);
-        setHasAccess(false);
+    function onDoc(e: MouseEvent) {
+      if (!btnRef.current) return;
+      const pop = document.getElementById("mini-cart-popover");
+      if (
+        open &&
+        !btnRef.current.contains(e.target as Node) &&
+        pop &&
+        !pop.contains(e.target as Node)
+      ) {
+        setOpen(false);
       }
-    };
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
 
-    checkAccess();
+  // Close on Esc
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  const handleCartClick = (e: React.MouseEvent) => {
-    if (hasAccess === false) {
-      e.preventDefault();
-      setShowAccessModal(true);
-    }
-  };
-
   return (
-    <>
-      <Link
-        href="/cart"
-        aria-label="Cart"
-        className="relative inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black/10 transition-colors"
-        prefetch={false}
-        onClick={handleCartClick}
+    <div className="relative">
+      <button
+        id={anchorId}
+        ref={btnRef}
+        aria-expanded={open}
+        aria-controls="mini-cart-popover"
+        onClick={() => setOpen(v => !v)}
+        className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 hover:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-black/10 transition-colors"
       >
         <ShoppingBag className="size-5 text-gray-700 hover:text-black transition-colors" strokeWidth={1.5} />
         {itemCount > 0 && (
@@ -49,18 +54,16 @@ export default function CartButton() {
             {itemCount > 99 ? "99+" : itemCount}
           </span>
         )}
-      </Link>
+      </button>
 
-      <AccessModal
-        isOpen={showAccessModal}
-        onClose={() => setShowAccessModal(false)}
-        onSuccess={() => {
-          setShowAccessModal(false);
-          setHasAccess(true);
-          // Optionally redirect to cart
-          window.location.href = '/cart';
-        }}
-      />
-    </>
+      {/* Dropdown */}
+      <div
+        id="mini-cart-popover"
+        className="absolute right-0 z-40"
+        style={{ top: "calc(100% + 6px)" }}
+      >
+        <MiniCart open={open} onClose={() => setOpen(false)} anchorId={anchorId} />
+      </div>
+    </div>
   );
 }
