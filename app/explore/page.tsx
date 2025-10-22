@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Filters from "@/components/explore/Filters";
+import CuratorAutocomplete from "@/components/search/CuratorAutocomplete";
 import { listCuratorsDefault, searchCuratorsAdvanced, CuratorCard } from "@/lib/searchCurators";
 
 export const runtime = "nodejs";
@@ -65,14 +66,14 @@ export default async function ExplorePage({
       <p className="mt-2 text-neutral-500">Explore curated stores by the content creators you admire</p>
 
       {/* Search form */}
-      <form action="/explore" className="mt-6">
-        <input
-          name="q"
+      <div className="mt-6 md:max-w-[520px]">
+        <CuratorAutocomplete
           defaultValue={q ?? ""}
+          submitTo="/explore"
+          queryParam="q"
           placeholder="Search by curator, city, or style…"
-          className="w-full rounded-xl border border-neutral-300 bg-white/70 px-4 py-2 text-sm outline-none placeholder:text-neutral-400 focus:border-black md:max-w-[520px]"
         />
-      </form>
+      </div>
 
       <div className="mt-8 flex">
         {/* Left filters */}
