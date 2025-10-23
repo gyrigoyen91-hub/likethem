@@ -1,19 +1,27 @@
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
-import FeaturedCurators from '@/components/FeaturedCurators'
-import HowItWorks from '@/components/HowItWorks'
+import HowItWorks from '@/components/home/HowItWorks'
 import Testimonials from '@/components/Testimonials'
 import Footer from '@/components/Footer'
 import AskNigel from '@/components/AskNigel'
-import ZoomDemo from '@/components/ZoomDemo'
 import NigelDemo from '@/components/NigelDemo'
+import { fetchFeaturedWithFallback } from '@/lib/curators/fetchFeaturedWithFallback'
+import CuratorsSectionPeek from '@/components/curators/CuratorsSectionPeek'
 
-export default function Home() {
+export default async function Home() {
+  const curators = await fetchFeaturedWithFallback(12); // enough to fill two+ rows
+  
   return (
     <>
       <Hero />
-      <FeaturedCurators />
-      <ZoomDemo />
+      <CuratorsSectionPeek
+        title="Featured Curators"
+        subtitle="Discover the most influential style curators in fashion."
+        curators={curators}
+        maxVisiblePx={780}  // tune until the second row "peeks" nicely
+        ctaHref="/explore"
+        ctaLabel="View all curators"
+      />
       <NigelDemo />
       <HowItWorks />
       <Testimonials />

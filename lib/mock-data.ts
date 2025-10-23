@@ -35,6 +35,66 @@ export const mockCurators = [
     user: {
       image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
     }
+  },
+  {
+    id: 'curator-4',
+    storeName: 'Emma Fashion',
+    slug: 'emma-fashion',
+    bio: 'Sustainable fashion advocate with a passion for vintage finds.',
+    bannerImage: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+    isPublic: true,
+    isEditorsPick: true,
+    user: {
+      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
+    }
+  },
+  {
+    id: 'curator-5',
+    storeName: 'Alex Streetwear',
+    slug: 'alex-streetwear',
+    bio: 'Urban style curator bringing street culture to high fashion.',
+    bannerImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+    isPublic: true,
+    isEditorsPick: false,
+    user: {
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
+    }
+  },
+  {
+    id: 'curator-6',
+    storeName: 'Maya Minimalist',
+    slug: 'maya-minimalist',
+    bio: 'Less is more. Curating timeless pieces for the modern minimalist.',
+    bannerImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+    isPublic: true,
+    isEditorsPick: false,
+    user: {
+      image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
+    }
+  },
+  {
+    id: 'curator-7',
+    storeName: 'Luna Vintage',
+    slug: 'luna-vintage',
+    bio: 'Vintage fashion curator with a passion for sustainable style and unique finds.',
+    bannerImage: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+    isPublic: true,
+    isEditorsPick: true,
+    user: {
+      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
+    }
+  },
+  {
+    id: 'curator-8',
+    storeName: 'Jordan Street',
+    slug: 'jordan-street',
+    bio: 'Urban fashion enthusiast bringing street culture to high-end style.',
+    bannerImage: 'https://images.unsplash.com/photo-1503341504253-dcdcd54663d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+    isPublic: true,
+    isEditorsPick: true,
+    user: {
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
+    }
   }
 ]
 
