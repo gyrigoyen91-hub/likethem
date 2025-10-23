@@ -12,6 +12,11 @@ cloudinary.config({
 
 export async function POST(request: NextRequest) {
   try {
+    // Skip during build time
+    if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
+      return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 })
+    }
+    
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {

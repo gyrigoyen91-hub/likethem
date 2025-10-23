@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Link from 'next/link'
 import Image from 'next/image'
+import CTAButton from '@/components/ui/CTAButton'
 
 export default function Hero() {
   return (
@@ -34,23 +34,14 @@ export default function Hero() {
             Curated fashion by top influencers. Exclusive access to the pieces that matter.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Link href="/explore" className="inline-block bg-black text-white px-8 py-4 font-medium tracking-wider uppercase text-sm hover:bg-gray-800 transition-colors duration-200">
-                Discover Stores
-              </Link>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Link href="/access" className="inline-block bg-white text-black border border-white px-8 py-4 font-medium tracking-wider uppercase text-sm hover:bg-gray-100 transition-colors duration-200">
-                Apply to Sell
-              </Link>
-            </motion.div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <CTAButton as="link" href="/explore" variant="primary" size="lg" className="tracking-[0.01em] md:tracking-normal">
+              Discover Stores
+            </CTAButton>
+
+            <CTAButton as="link" href="/apply" variant="secondary" size="lg" className="tracking-[0.01em] md:tracking-normal">
+              Apply to Sell
+            </CTAButton>
           </div>
         </motion.div>
       </div>

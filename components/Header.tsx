@@ -1,45 +1,91 @@
-import Link from "next/link";
-import Logo from "@/components/Logo";
-import UserChip from "@/components/UserChip";
-import HeaderSearch from "@/components/search/HeaderSearch";
-import CartButton from "@/components/CartButton";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+'use client';
 
-export default async function Header() {
-  const session = await getServerSession(authOptions);
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Heart } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import CartButton from '@/components/CartButton';
+import UserChip from '@/components/UserChip';
+import { useSession } from 'next-auth/react';
+
+const NAV = [
+  { href: '/explore', label: 'Dress Like Them' },
+  { href: '/apply', label: 'Sell Like Them' },
+];
+
+export default function Header() {
+  const pathname = usePathname();
+  const { data: session } = useSession();
   const user = session?.user;
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur bg-white/75 border-b border-gray-100">
-      <div className="mx-auto max-w-7xl h-14 grid grid-cols-[1fr_auto_1fr] items-center px-4">
-        <div className="flex items-center">
-          <Logo />
-        </div>
-
-        <nav className="flex items-center gap-10 justify-center">
-          <Link
-            href="/explore"
-            className="text-sm text-gray-800 hover:text-black hover:underline underline-offset-4 transition-colors"
-          >
-            Dress Like Them
-          </Link>
-          <Link
-            href="/sell"
-            className="text-sm text-gray-800 hover:text-black hover:underline underline-offset-4 transition-colors"
-          >
-            Sell Like Them
-          </Link>
-        </nav>
-
-        <div className="flex items-center justify-end gap-4">
-          {/* Desktop search */}
-          <div className="hidden md:block">
-            <HeaderSearch />
+    <header
+      className={cn(
+        'sticky top-0 z-40',
+        'border-b border-black/5',
+        'bg-white/70 backdrop-blur-md'
+      )}
+    >
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="h-16 flex items-center justify-between">
+          {/* Left: Logo */}
+          <div className="flex items-center">
+            <Link href="/" className="font-serif text-xl tracking-wide">
+              LIKETHEM
+            </Link>
           </div>
 
-          <CartButton />
-          <UserChip user={user ?? null} />
+          {/* Center: Navigation */}
+          <nav className="hidden md:flex items-center gap-10">
+            {NAV.map((item) => {
+              const active = pathname?.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'group relative inline-flex items-center text-sm text-neutral-700 transition-colors hover:text-black',
+                    active && 'text-black font-medium'
+                  )}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {item.label}
+                  {/* Underline */}
+                  <span
+                    className={cn(
+                      'pointer-events-none absolute -bottom-1 left-0 h-[1px] w-full origin-left bg-neutral-900/90',
+                      'opacity-0 scale-x-0 transition-all duration-300 ease-out',
+                      'group-hover:opacity-100 group-hover:scale-x-100 group-focus-visible:opacity-100 group-focus-visible:scale-x-100',
+                      'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:scale-x-100',
+                      active && 'opacity-100 scale-x-100'
+                    )}
+                    aria-hidden="true"
+                  />
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-3">
+            {/* Favorites Button */}
+            <Link
+              href="/favorites"
+              aria-label="View Favorites"
+              className="relative flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-all duration-200"
+            >
+              <Heart
+                className={cn(
+                  'w-[18px] h-[18px] text-neutral-700 transition-colors duration-200',
+                  pathname === '/favorites' && 'text-black fill-black'
+                )}
+                strokeWidth={1.5}
+              />
+            </Link>
+
+            <CartButton />
+            <UserChip user={user ?? null} />
+          </div>
         </div>
       </div>
     </header>
