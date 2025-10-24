@@ -1,10 +1,7 @@
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+import { NextResponse } from 'next/server';
+
+export const dynamic = 'force-static';
 
 export async function GET() {
-  console.log('[health] alive');
-  return new Response(JSON.stringify({ ok: true, ts: Date.now() }), {
-    headers: { 'content-type': 'application/json' },
-    status: 200,
-  });
+  return NextResponse.json({ ok: true, ts: Date.now() }, { status: 200 });
 }
