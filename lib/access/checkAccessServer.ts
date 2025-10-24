@@ -45,8 +45,8 @@ export async function checkAccessServer(curatorId?: string): Promise<boolean> {
         .eq('id', grant.grantId)
         .single();
 
-      if (dbGrant && (!curatorId || dbGrant.curatorId === curatorId)) {
-        console.log('[access-check-server] Valid grant found:', { grantId: grant.grantId, curatorId: dbGrant.curatorId });
+      if (dbGrant && (!curatorId || (dbGrant as any).curatorId === curatorId)) {
+        console.log('[access-check-server] Valid grant found:', { grantId: grant.grantId, curatorId: (dbGrant as any).curatorId });
         return true;
       }
     } catch (error) {

@@ -15,12 +15,8 @@ export default function MiniCart({ open, onClose, anchorId }: Props) {
   const { items, getSubtotal, updateQuantity, removeItem } = useCart();
   const router = useRouter();
 
-  // Close on route change
-  useEffect(() => {
-    const handleRouteChange = () => onClose();
-    router.events?.on('routeChangeStart', handleRouteChange);
-    return () => router.events?.off('routeChangeStart', handleRouteChange);
-  }, [router, onClose]);
+  // Note: In App Router, we can't listen to route changes like in Pages Router
+  // The modal will close when the user navigates away
 
   if (!open) return null;
 

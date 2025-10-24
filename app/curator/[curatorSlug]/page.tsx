@@ -108,7 +108,7 @@ export default async function CuratorPage({
   params, 
   searchParams 
 }: { 
-  params: { slug: string }; 
+  params: { curatorSlug: string }; 
   searchParams: Search; 
 }) {
   try {
@@ -227,7 +227,7 @@ export default async function CuratorPage({
         imageUrl: (Array.isArray(p.product_images) && p.product_images[0]?.url) || null,
         category: p.category ?? null,
         createdAt: p.createdAt,
-        visibility: 'general' // Temporary default until visibility system is implemented
+        visibility: 'general' as const // Temporary default until visibility system is implemented
       }))
     }
 
@@ -248,7 +248,7 @@ export default async function CuratorPage({
     const tabs = [
       { key: 'general', label: 'General', count: generalCount.count ?? 0 },
       { key: 'inner', label: 'Inner', count: innerCount.count ?? 0 },
-      { key: 'drops', label: 'Drops', count: dropCount },
+      { key: 'drops', label: 'Drops', count: dropCount.count ?? 0 },
     ]
 
     const description = (curator as any).bio || `Discover unique fashion curated by ${(curator as any).storeName}`

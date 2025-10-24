@@ -119,7 +119,8 @@ export default function ClosetSectionClient({
               ) : (
                 <ProductCardLocked 
                   key={product.id} 
-                  product={{ ...product, curatorId }} 
+                  product={product}
+                  curatorId={curatorId}
                 />
               )
             )}

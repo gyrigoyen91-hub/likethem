@@ -38,7 +38,7 @@ export async function fetchFeaturedWithFallback(minCount = 12): Promise<Curator[
     const byId = new Map<string, Curator>();
     
     // Transform featured data
-    featured.forEach((c) => {
+    (featured as any[])?.forEach((c) => {
       byId.set(c.id, {
         id: c.id,
         slug: c.slug,
@@ -68,7 +68,7 @@ export async function fetchFeaturedWithFallback(minCount = 12): Promise<Curator[
         throw fallbackError;
       }
 
-      for (const c of fallback) {
+      for (const c of (fallback as any[]) || []) {
         if (byId.size >= minCount) break;
         if (!byId.has(c.id)) {
           byId.set(c.id, {

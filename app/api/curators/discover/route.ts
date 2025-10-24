@@ -41,7 +41,7 @@ export async function GET(req: Request) {
 
   // For each curator, find best hero image (latest product image > banner)
   const result = [];
-  for (const c of rows || []) {
+  for (const c of (rows as any[]) || []) {
     let hero = c.bannerImage ?? null;
 
     if (!hero) {
@@ -54,15 +54,15 @@ export async function GET(req: Request) {
         .limit(1)
         .single();
 
-      if (p?.id) {
+      if ((p as any)?.id) {
         const { data: img } = await supabase
           .from("product_images")
           .select("url")
-          .eq("productId", p.id)
+          .eq("productId", (p as any).id)
           .order("order", { ascending: true })
           .limit(1)
           .single();
-        hero = img?.url ?? null;
+        hero = (img as any)?.url ?? null;
       }
     }
 
@@ -80,7 +80,7 @@ export async function GET(req: Request) {
     });
   }
 
-  const nextCursor = rows?.length === limit ? rows[rows.length - 1].createdAt : null;
+  const nextCursor = (rows as any[])?.length === limit ? (rows as any[])[(rows as any[]).length - 1].createdAt : null;
   return NextResponse.json({ items: result, nextCursor });
 }
 

@@ -14,10 +14,9 @@ export type ProductCardData = {
   isFeatured?: boolean;
   createdAt?: string;
   category?: string | null;
-  curatorId: string; // Added for access check
 };
 
-export default function ProductCardLocked({ product }: { product: ProductCardData }) {
+export default function ProductCardLocked({ product, curatorId }: { product: ProductCardData; curatorId: string }) {
   const href = product.slug ? `/product/${product.slug}` : "#";
   const [showAccessModal, setShowAccessModal] = useState(false);
 
@@ -71,7 +70,6 @@ export default function ProductCardLocked({ product }: { product: ProductCardDat
           setShowAccessModal(false);
           window.location.reload(); // Reload page to reflect access
         }}
-        curatorId={product.curatorId}
       />
     </>
   );

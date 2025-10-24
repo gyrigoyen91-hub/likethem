@@ -80,7 +80,7 @@ export default function CuratorsSectionPeek({
                   followers={c.followersCount}
                   hero={coverImageFor(c)}
                   postUrl={c.feedPostUrl}
-                  isEditorsPick={c.isEditorsPick}
+                  isEditorsPick={c.isEditorsPick ?? false}
                 />
               </div>
             ))}

@@ -53,29 +53,29 @@ async function fetchData(curatorSlug: string, productSlug: string) {
       return getMockProductData(curatorSlug, productSlug);
     }
 
-    if (!data || !data.curator || data.curator.slug !== curatorSlug) {
+    if (!data || !(data as any).curator || (data as any).curator.slug !== curatorSlug) {
       return getMockProductData(curatorSlug, productSlug);
     }
 
     // normalize arrays if stored as text
     const sizes =
-      Array.isArray(data.sizes)
-        ? data.sizes
-        : typeof data.sizes === "string" && data.sizes.trim()
-        ? data.sizes.split(",").map((s: string) => s.trim())
+      Array.isArray((data as any).sizes)
+        ? (data as any).sizes
+        : typeof (data as any).sizes === "string" && (data as any).sizes.trim()
+        ? (data as any).sizes.split(",").map((s: string) => s.trim())
         : [];
     const colors =
-      Array.isArray(data.colors)
-        ? data.colors
-        : typeof data.colors === "string" && data.colors.trim()
-        ? data.colors.split(",").map((s: string) => s.trim())
+      Array.isArray((data as any).colors)
+        ? (data as any).colors
+        : typeof (data as any).colors === "string" && (data as any).colors.trim()
+        ? (data as any).colors.split(",").map((s: string) => s.trim())
         : [];
 
-    const images = (data.images ?? []).sort(
+    const images = ((data as any).images ?? []).sort(
       (a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
     );
 
-    return { ...data, sizes, colors, images };
+    return { ...(data as any), sizes, colors, images };
   } catch (error) {
     console.error("Product fetch error:", error);
     return getMockProductData(curatorSlug, productSlug);
@@ -103,8 +103,8 @@ function getMockProductData(curatorSlug: string, productSlug: string) {
     ...product,
     curator,
     images,
-    sizes: product.sizes ? product.sizes.split(",").map(s => s.trim()) : [],
-    colors: product.colors ? product.colors.split(",").map(s => s.trim()) : [],
+    sizes: (product as any).sizes ? (product as any).sizes.split(",").map((s: string) => s.trim()) : [],
+    colors: (product as any).colors ? (product as any).colors.split(",").map((s: string) => s.trim()) : [],
   };
 }
 
@@ -124,7 +124,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       if (!mockProduct) return { title: "Product Not Found — LikeThem" };
 
       const title = `${mockProduct.title} — LikeThem`;
-      const description = mockProduct.description ?? "Curated fashion by top influencers.";
+      const description = (mockProduct as any).description ?? "Curated fashion by top influencers.";
       const url = `https://likethem.io/curator/${params.curatorSlug}/product/${mockProduct.slug}`;
 
       return {
@@ -135,9 +135,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
-    const title = `${data.title} — LikeThem`;
-    const description = data.description ?? "Curated fashion by top influencers.";
-    const url = `https://likethem.io/curator/${data.curator?.slug ?? "shop"}/product/${data.slug}`;
+    const title = `${(data as any).title} — LikeThem`;
+    const description = (data as any).description ?? "Curated fashion by top influencers.";
+    const url = `https://likethem.io/curator/${(data as any).curator?.slug ?? "shop"}/product/${(data as any).slug}`;
 
     return {
       title,

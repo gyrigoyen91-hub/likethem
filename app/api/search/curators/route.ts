@@ -39,7 +39,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({
-      items: (data ?? []).map((r) => ({
+      items: ((data as any[]) ?? []).map((r) => ({
         id: r.id,
         slug: r.slug,
         title: r.storeName,

@@ -39,7 +39,7 @@ export default async function FeaturedCurators() {
       }));
     } else {
       // Transform Supabase data to match our card format
-      let supabaseData = (data || []).map(c => ({
+      let supabaseData = ((data as any[]) || []).map(c => ({
         id: c.id,
         slug: c.slug,
         name: c.storeName,

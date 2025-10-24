@@ -37,8 +37,6 @@ export default function AccessModalTrigger({
       <AccessModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        curatorId={curatorId}
-        curatorName={curatorName}
       />
     </>
   );

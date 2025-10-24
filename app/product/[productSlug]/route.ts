@@ -21,11 +21,11 @@ export async function GET(
       return NextResponse.redirect(new URL("/", _req.url), 302);
     }
 
-    if (!data || !data.curator?.slug) {
+    if (!data || !(data as any).curator?.slug) {
       return NextResponse.redirect(new URL("/", _req.url), 302);
     }
 
-    const dest = `/curator/${data.curator.slug}/product/${params.productSlug}`;
+    const dest = `/curator/${(data as any).curator.slug}/product/${params.productSlug}`;
     return NextResponse.redirect(new URL(dest, _req.url), 302);
   } catch (error) {
     console.error("Redirect error:", error);

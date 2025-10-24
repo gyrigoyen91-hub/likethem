@@ -153,7 +153,7 @@ export async function searchCurators(q: string, limit = 12): Promise<SearchResul
   if (!term) return [];
 
   // Normalize for diacritics (client-side) so 'Sofia' matches 'Sofía'
-  const clientKey = term.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  const clientKey = term.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   try {
     const supabase = getSupabaseServer();

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { formatDistanceToNowStrict, intervalToDuration } from 'date-fns';
+import { formatDistanceToNowStrict, intervalToDuration, type Duration } from 'date-fns';
 
 interface DropHeroProps {
   drop: {

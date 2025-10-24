@@ -23,9 +23,9 @@ export default function AddToCartButton({ productId, disabled, className, childr
       await addItem({
         id: productId,
         name: "Product", // This would come from product data
+        curator: "Unknown", // This would come from product data
         price: 0, // This would come from product data
         image: "", // This would come from product data
-        quantity: 1,
       });
     } catch (error) {
       console.error("Failed to add to cart:", error);

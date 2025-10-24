@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
+
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client'],
@@ -24,7 +26,7 @@ const nextConfig = {
   output: 'standalone',
   images: {
     // Avoid expensive image work during local builds
-    unoptimized: process.env.CI !== 'true',
+    unoptimized: !isCI,
     remotePatterns: [
       { protocol: 'https', hostname: 'picsum.photos' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
@@ -33,12 +35,13 @@ const nextConfig = {
   },
   typescript: {
     // Prevent TS check from hanging local builds; CI will still check types
-    ignoreBuildErrors: process.env.CI !== 'true',
+    ignoreBuildErrors: !isCI,
   },
   eslint: {
     // Lint in CI, not during local prod builds
-    ignoreDuringBuilds: process.env.CI !== 'true',
+    ignoreDuringBuilds: !isCI,
   },
+  reactStrictMode: true,
 }
 
 module.exports = nextConfig 
