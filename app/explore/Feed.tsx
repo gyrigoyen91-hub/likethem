@@ -106,7 +106,7 @@ export default function Feed() {
 
   return (
     <>
-      <MasonryColumns className="mt-8">
+      <MasonryColumns>
         {items.map((it, i) => (
           <CuratorCardMasonry
             key={it.id}
