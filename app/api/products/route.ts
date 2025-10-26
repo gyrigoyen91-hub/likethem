@@ -3,6 +3,9 @@ import { getApiUser, requireApiRole, createApiErrorResponse, createApiSuccessRes
 import { PrismaClient } from '@prisma/client'
 import { generateUniqueSlug } from '@/lib/slugify'
 
+// IMPORTANT: Prisma requires Node.js runtime
+export const runtime = 'nodejs';
+
 const prisma = new PrismaClient()
 
 // GET /api/products - Get all products for the logged-in curator

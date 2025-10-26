@@ -9,6 +9,7 @@ export function middleware(req: NextRequest) {
     "/",
     "/explore",
     "/api/health",
+    "/api/auth", // CRITICAL: NextAuth routes must be public
     "/api/curator/decision", // Public endpoint for email links
     "/_next",
     "/favicon.ico",
@@ -78,14 +79,16 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/dashboard/curator/:path*",
-    "/admin/:path*",
-    "/api/curator/apply",
-    "/orders/:path*",
-    "/sell/:path*",
-    "/account/:path*",
-    "/checkout/:path*",
-    "/api/cart/:path*",
-    "/api/orders/:path*",
+    // Keep protected matchers, but explicitly exclude NextAuth & static assets
+    '/((?!api/auth|api/health|_next/static|_next/image|favicon.ico|images).*)',
+    '/sell/:path*',
+    '/orders/:path*',
+    '/dashboard/curator/:path*',
+    '/admin/:path*',
+    '/api/curator/apply',
+    '/account/:path*',
+    '/checkout/:path*',
+    '/api/cart/:path*',
+    '/api/orders/:path*',
   ],
 }; 

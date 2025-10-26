@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma';
 import { sendApplicationNotification } from '@/lib/mailer';
 import { createDecisionUrls } from '@/lib/approval-token';
 
+// IMPORTANT: Prisma requires Node.js runtime
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     // Detailed logging for debugging

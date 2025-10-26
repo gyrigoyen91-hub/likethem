@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getApiUser, requireApiRole, createApiErrorResponse, createApiSuccessResponse } from '@/lib/api-auth'
 import { PrismaClient } from '@prisma/client'
 
+// IMPORTANT: Prisma requires Node.js runtime
+export const runtime = 'nodejs';
+
 const prisma = new PrismaClient()
 
 // GET /api/admin/users - Get all users (admin only)

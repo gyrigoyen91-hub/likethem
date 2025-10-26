@@ -11,6 +11,7 @@ const prisma = new PrismaClient();
 export type UserRole = 'BUYER' | 'CURATOR' | 'ADMIN';
 
 export const authOptions: NextAuthOptions = {
+  debug: process.env.NODE_ENV === 'development',
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -39,18 +40,35 @@ export const authOptions: NextAuthOptions = {
       // If this is a sign in, fetch user data from database
       if (account && user) {
         try {
+          console.log('🔍 JWT Callback - Sign in detected:', { 
+            provider: account.provider, 
+            email: user.email,
+            hasDatabase: !!process.env.DATABASE_URL 
+          });
+          
           const dbUser = await prisma.user.findUnique({
             where: { email: user.email! },
             select: { id: true, email: true, role: true, fullName: true }
           });
           
           if (dbUser) {
+            console.log('✅ User found in database:', { id: dbUser.id, role: dbUser.role });
             token.id = dbUser.id;
             token.role = dbUser.role;
             token.fullName = dbUser.fullName || undefined;
+          } else {
+            console.log('⚠️ User not found in database, using default role');
+            // Fallback: create a basic token without database lookup
+            token.id = user.email; // Use email as fallback ID
+            token.role = 'BUYER'; // Default role
+            token.fullName = user.name || user.email;
           }
         } catch (error) {
-          console.error('Error fetching user from database:', error);
+          console.error('❌ Error fetching user from database:', error);
+          // Fallback: create a basic token without database lookup
+          token.id = user.email; // Use email as fallback ID
+          token.role = 'BUYER'; // Default role
+          token.fullName = user.name || user.email;
         }
       }
       return token;
@@ -82,6 +100,6 @@ export function requireRole(user: any, role: string) {
 }
 
 // Helper for API routes to get session from request
-export async function auth(request: Request) {
+export async function auth(request?: Request) {
   return await getServerSession(authOptions);
 }

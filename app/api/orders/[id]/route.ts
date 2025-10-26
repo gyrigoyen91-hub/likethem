@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
 
+// IMPORTANT: Prisma requires Node.js runtime
+export const runtime = 'nodejs';
+
 const prisma = new PrismaClient();
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {

@@ -4,6 +4,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
 import { generateSlugFromStoreName } from '@/lib/slug'
 
+// IMPORTANT: Prisma requires Node.js runtime
+export const runtime = 'nodejs';
+
 const prisma = new PrismaClient()
 
 // GET /api/curator/profile - Get current user's curator profile

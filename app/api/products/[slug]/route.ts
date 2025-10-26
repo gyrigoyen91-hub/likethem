@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
 import { PrismaClient } from '@prisma/client'
 
+// IMPORTANT: Prisma requires Node.js runtime
+export const runtime = 'nodejs';
+
 const prisma = new PrismaClient()
 
 // GET /api/products/[slug] - Get a specific product by slug (public access)

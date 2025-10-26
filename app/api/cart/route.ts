@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getApiUser, requireApiAuth, createApiErrorResponse, createApiSuccessResponse } from '@/lib/api-auth'
 import { PrismaClient } from '@prisma/client'
 
+// IMPORTANT: Prisma requires Node.js runtime
+export const runtime = 'nodejs';
+
 const prisma = new PrismaClient()
 
 // GET - Fetch user's cart items
