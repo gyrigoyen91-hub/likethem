@@ -13,6 +13,12 @@ enum Role {
   BUYER
 }
 
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id            String          @id @default(cuid())
   email         String          @unique
@@ -29,6 +35,7 @@ model User {
   curatorProfile CuratorProfile?
   favorites     Favorite[]
   orders        Order[]         @relation("BuyerOrders")
+  sellerApplication SellerApplication?
 
   @@map("users")
 }
@@ -220,4 +227,23 @@ model CollaborationRequest {
   fromCurator   CuratorProfile @relation("FromCurator", fields: [fromCuratorId], references: [id], onDelete: Cascade)
 
   @@map("collaboration_requests")
+}
+
+model SellerApplication {
+  id           String            @id @default(cuid())
+  userId       String            @unique
+  fullName     String
+  socialLinks  String?           // comma-separated or JSON
+  audienceBand String?           // e.g. "LT_10K", "10K_50K"
+  reason       String?
+  status       ApplicationStatus @default(PENDING)
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  decisionNote String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id])
+
+  @@map("seller_applications")
 }

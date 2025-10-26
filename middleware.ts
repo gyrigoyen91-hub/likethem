@@ -9,6 +9,7 @@ export function middleware(req: NextRequest) {
     "/",
     "/explore",
     "/api/health",
+    "/api/curator/decision", // Public endpoint for email links
     "/_next",
     "/favicon.ico",
     "/images",
@@ -30,12 +31,27 @@ export function middleware(req: NextRequest) {
   }
 
   // Auth-required paths (generic)
-  const authPaths = ["/orders", "/sell", "/account", "/checkout", "/api/cart", "/api/orders"];
+  const authPaths = ["/orders", "/sell", "/account", "/checkout", "/api/cart", "/api/orders", "/api/curator/apply"];
   if (authPaths.some(p => pathname === p || pathname.startsWith(p + "/"))) {
     return getToken({ req, secret: process.env.NEXTAUTH_SECRET })
       .then(token => {
         if (!token) {
           return NextResponse.redirect(new URL("/auth/signin", req.url));
+        }
+        return NextResponse.next();
+      })
+      .catch(() => NextResponse.redirect(new URL("/auth/signin", req.url)));
+  }
+
+  // Admin-only paths
+  if (pathname.startsWith("/admin")) {
+    return getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+      .then(token => {
+        if (!token) {
+          return NextResponse.redirect(new URL("/auth/signin", req.url));
+        }
+        if (token.role !== 'ADMIN') {
+          return NextResponse.redirect(new URL("/unauthorized", req.url));
         }
         return NextResponse.next();
       })
@@ -62,7 +78,14 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Temporarily disable middleware to test deployment
-    "/dashboard/curator",
+    "/dashboard/curator/:path*",
+    "/admin/:path*",
+    "/api/curator/apply",
+    "/orders/:path*",
+    "/sell/:path*",
+    "/account/:path*",
+    "/checkout/:path*",
+    "/api/cart/:path*",
+    "/api/orders/:path*",
   ],
 }; 
