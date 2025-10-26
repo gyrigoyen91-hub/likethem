@@ -12,6 +12,7 @@ export type UserRole = 'BUYER' | 'CURATOR' | 'ADMIN';
 
 export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === 'development',
+  trustHost: true, // Required for Vercel deployment
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,

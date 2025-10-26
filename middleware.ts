@@ -78,17 +78,17 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // Exclude /api/auth entirely from matching
   matcher: [
-    // Keep protected matchers, but explicitly exclude NextAuth & static assets
-    '/((?!api/auth|api/health|_next/static|_next/image|favicon.ico|images).*)',
-    '/sell/:path*',
-    '/orders/:path*',
-    '/dashboard/curator/:path*',
-    '/admin/:path*',
-    '/api/curator/apply',
-    '/account/:path*',
-    '/checkout/:path*',
-    '/api/cart/:path*',
-    '/api/orders/:path*',
+    "/((?!api/auth|api/health|_next/static|_next/image|favicon.ico|images).*)",
+    "/sell/:path*",
+    "/orders/:path*",
+    "/dashboard/curator/:path*",
+    "/admin/:path*",
+    "/api/curator/apply",
+    "/account/:path*",
+    "/checkout/:path*",
+    "/api/cart/:path*",
+    "/api/orders/:path*",
   ],
 }; 
