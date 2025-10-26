@@ -7,10 +7,14 @@ export const revalidate = 0;
 
 function FeedSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="h-[380px] w-full animate-pulse rounded-2xl bg-zinc-100" />
-      ))}
+    <div className="mt-8">
+      <div className="mx-auto w-full max-w-[1200px] px-4 md:px-6">
+        <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 [column-fill:_balance]">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="mb-4 break-inside-avoid h-[400px] w-full animate-pulse rounded-2xl bg-zinc-100" />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

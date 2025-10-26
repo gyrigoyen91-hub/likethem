@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CuratorCard } from "@/components/explore/CuratorCard";
+import { CuratorFeed } from "@/components/curators/CuratorFeed";
 import { useSearchParams } from "next/navigation";
 
 type Item = {
@@ -104,11 +104,7 @@ export default function Feed() {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
-        {items.map((it) => (
-          <CuratorCard key={it.id} {...it} />
-        ))}
-      </div>
+      <CuratorFeed curators={items} className="mt-8" />
 
       {/* sentinel for infinite scroll */}
       <div ref={sentinel} className="h-12" />

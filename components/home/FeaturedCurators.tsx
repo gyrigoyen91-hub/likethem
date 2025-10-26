@@ -1,5 +1,4 @@
-import MasonryGrid from "@/components/discover/MasonryGrid";
-import CuratorFeedCard from "@/components/discover/CuratorFeedCard";
+import { CuratorFeed } from "@/components/curators/CuratorFeed";
 import Link from "next/link";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { mockCurators } from "@/lib/mock-data";
@@ -124,21 +123,7 @@ export default async function FeaturedCurators() {
 
       {/* ---- TOP ROW (crisp) ---- */}
       <div className="relative mx-auto mt-10 w-full max-w-[1200px] px-4 md:px-6">
-        <MasonryGrid>
-          {firstRow.map((c) => (
-            <CuratorFeedCard
-              key={c.id}
-              slug={c.slug}
-              name={c.name}
-              avatar={c.avatar}
-              city={c.city}
-              followers={c.followers}
-              hero={c.hero}
-              postUrl={c.postUrl}
-              isEditorsPick={c.isEditorsPick}
-            />
-          ))}
-        </MasonryGrid>
+        <CuratorFeed curators={firstRow} />
 
         {/* ---- CTA sits ON the boundary with padding ---- */}
         <div className="pointer-events-auto absolute left-1/2 top-[100%] z-30 -translate-x-1/2 -translate-y-1/2 px-4 py-2">
@@ -180,21 +165,7 @@ export default async function FeaturedCurators() {
                   translate-y-[-8px]
                 "
               >
-                <MasonryGrid>
-                  {secondRow.map((c) => (
-                    <CuratorFeedCard
-                      key={c.id}
-                      slug={c.slug}
-                      name={c.name}
-                      avatar={c.avatar}
-                      city={c.city}
-                      followers={c.followers}
-                      hero={c.hero}
-                      postUrl={c.postUrl}
-                      isEditorsPick={c.isEditorsPick}
-                    />
-                  ))}
-                </MasonryGrid>
+                <CuratorFeed curators={secondRow} />
               </div>
             </div>
           </div>
