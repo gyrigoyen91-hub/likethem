@@ -62,6 +62,7 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|images|api/health).*)",
+    // Temporarily disable middleware to test deployment
+    "/dashboard/curator",
   ],
 }; 
