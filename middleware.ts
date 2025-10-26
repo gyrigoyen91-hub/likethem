@@ -4,8 +4,8 @@ import { getToken } from 'next-auth/jwt';
 // Never run middleware on these (static, images, favicon, healthcheck, OG, etc.)
 export const config = {
   matcher: [
-    // Run on everything *except* the paths below
-    '/((?!_next/static|_next/image|favicon.ico|images|public|api/health|robots.txt|sitemap.xml).*)',
+    // Temporarily disable middleware for debugging
+    '/dashboard/:path*',
   ],
 };
 
