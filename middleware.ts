@@ -1,55 +1,70 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-// Never run middleware on these (static, images, favicon, healthcheck, OG, etc.)
-export const config = {
-  matcher: [
-    // Temporarily disable middleware for debugging
-    '/dashboard/:path*',
-  ],
-};
-
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow all public routes without authentication
-  const PUBLIC_PREFIXES = [
-    '/', '/discover', '/curator', '/product', '/access', '/sell', '/apply', 
-    '/api/access', '/api/health', '/auth', '/explore', '/favorites', '/search'
+  // Public allowlist - these routes don't require authentication
+  const publicPaths = [
+    "/",
+    "/explore",
+    "/api/health",
+    "/_next",
+    "/favicon.ico",
+    "/images",
+    "/curator",
+    "/product",
+    "/access",
+    "/apply",
+    "/auth",
+    "/favorites",
+    "/search",
+    "/api/access",
+    "/api/curators",
+    "/api/products",
+    "/api/search"
   ];
   
-  if (PUBLIC_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'))) {
+  if (publicPaths.some(p => pathname === p || pathname.startsWith(p + "/"))) {
     return NextResponse.next();
   }
 
-  // Only protect specific routes that require authentication
-  const PROTECTED_PREFIXES = ['/dashboard', '/account', '/checkout', '/orders', '/api/cart', '/api/orders', '/api/curator'];
-  
-  if (PROTECTED_PREFIXES.some(p => pathname.startsWith(p + '/'))) {
-    try {
-      const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-      
-      if (!token) {
-        return NextResponse.redirect(new URL('/auth/signin', req.url));
-      }
-
-      // Check for CURATOR role on dashboard routes
-      if (pathname.startsWith('/dashboard/curator') && token.role !== 'CURATOR') {
-        return NextResponse.redirect(new URL('/unauthorized', req.url));
-      }
-
-      // Check for ADMIN role on admin routes
-      if (pathname.startsWith('/dashboard/admin') && token.role !== 'ADMIN') {
-        return NextResponse.redirect(new URL('/unauthorized', req.url));
-      }
-
-      return NextResponse.next();
-    } catch (error) {
-      console.error('Middleware error:', error);
-      return NextResponse.next();
-    }
+  // Auth-required paths (generic)
+  const authPaths = ["/orders", "/sell", "/account", "/checkout", "/api/cart", "/api/orders"];
+  if (authPaths.some(p => pathname === p || pathname.startsWith(p + "/"))) {
+    return getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+      .then(token => {
+        if (!token) {
+          return NextResponse.redirect(new URL("/auth/signin", req.url));
+        }
+        return NextResponse.next();
+      })
+      .catch(() => NextResponse.redirect(new URL("/auth/signin", req.url)));
   }
 
-  // Default allow
+  // Curator-only paths
+  if (pathname === "/dashboard/curator" || pathname.startsWith("/dashboard/curator")) {
+    return getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+      .then(token => {
+        if (!token) {
+          return NextResponse.redirect(new URL("/auth/signin", req.url));
+        }
+        if (token.role !== 'CURATOR') {
+          return NextResponse.redirect(new URL("/unauthorized", req.url));
+        }
+        return NextResponse.next();
+      })
+      .catch(() => NextResponse.redirect(new URL("/auth/signin", req.url)));
+  }
+
   return NextResponse.next();
-} 
+}
+
+export const config = {
+  matcher: [
+    "/((?!api/health|_next/static|_next/image|favicon.ico|images).*)",
+    "/sell/:path*",
+    "/orders/:path*",
+    "/dashboard/curator",
+  ],
+}; 
