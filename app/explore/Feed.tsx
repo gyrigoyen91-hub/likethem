@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import CuratorFeedCard from "@/components/discover/CuratorFeedCard";
-import MasonryGrid from "@/components/discover/MasonryGrid";
+import { CuratorCard } from "@/components/explore/CuratorCard";
 import { useSearchParams } from "next/navigation";
 
 type Item = {
@@ -105,11 +104,11 @@ export default function Feed() {
 
   return (
     <>
-      <MasonryGrid>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
         {items.map((it) => (
-          <CuratorFeedCard key={it.id} {...it} />
+          <CuratorCard key={it.id} {...it} />
         ))}
-      </MasonryGrid>
+      </div>
 
       {/* sentinel for infinite scroll */}
       <div ref={sentinel} className="h-12" />

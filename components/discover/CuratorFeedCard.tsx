@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { safeSrc } from "@/lib/img";
 
 type Props = {
   slug: string;
@@ -26,7 +27,7 @@ export default function CuratorFeedCard(props: Props) {
         <Link href={`/curator/${props.slug}`} aria-label={`Open ${props.name}'s closet`}>
           {props.hero && imgOk ? (
             <Image
-              src={props.hero}
+              src={safeSrc(props.hero)}
               alt={`${props.name} — closet preview`}
               width={800}
               height={1000}
@@ -54,7 +55,7 @@ export default function CuratorFeedCard(props: Props) {
       <div className="flex items-center gap-3 px-4 py-3">
         <div className="h-9 w-9 overflow-hidden rounded-full ring-1 ring-zinc-200/70 bg-zinc-100">
           {props.avatar ? (
-            <Image src={props.avatar} alt={`${props.name} avatar`} width={36} height={36} className="h-9 w-9 object-cover" />
+            <Image src={safeSrc(props.avatar)} alt={`${props.name} avatar`} width={36} height={36} className="h-9 w-9 object-cover" />
           ) : null}
         </div>
 

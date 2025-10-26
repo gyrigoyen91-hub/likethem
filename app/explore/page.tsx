@@ -1,5 +1,4 @@
-import MasonryGrid from "@/components/discover/MasonryGrid";
-import CuratorFeedCard from "@/components/discover/CuratorFeedCard";
+import { CuratorCard } from "@/components/explore/CuratorCard";
 import Feed from "./Feed";
 import { Suspense } from "react";
 
@@ -8,11 +7,11 @@ export const revalidate = 0;
 
 function FeedSkeleton() {
   return (
-    <MasonryGrid>
-      {Array.from({ length: 9 }).map((_, i) => (
-        <div key={i} className="mb-4 h-[380px] w-full animate-pulse break-inside-avoid rounded-2xl bg-zinc-100" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="h-[380px] w-full animate-pulse rounded-2xl bg-zinc-100" />
       ))}
-    </MasonryGrid>
+    </div>
   );
 }
 

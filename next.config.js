@@ -24,11 +24,14 @@ const nextConfig = {
     return config
   },
   images: {
-    // we're serving local/public images; keep unoptimized on CI to avoid timeouts
-    unoptimized: process.env.CI === 'true',
+    // Helpful for local dev when new hosts appear
+    unoptimized: process.env.NODE_ENV === "development",
     remotePatterns: [
-      { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },   // Google OAuth avatars
+      { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'picsum.photos' },
       { protocol: 'https', hostname: 'mineihnvptbfkqdfcrzg.supabase.co' },
     ],
   },

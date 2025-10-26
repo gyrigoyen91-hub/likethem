@@ -3,6 +3,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { type NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export type UserRole = 'BUYER' | 'CURATOR' | 'ADMIN';
 
@@ -29,6 +32,37 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/signin", // our custom sign-in page
+  },
+  callbacks: {
+    async jwt({ token, user, account }) {
+      // If this is a sign in, fetch user data from database
+      if (account && user) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            select: { id: true, email: true, role: true, fullName: true }
+          });
+          
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.role = dbUser.role;
+            token.fullName = dbUser.fullName || undefined;
+          }
+        } catch (error) {
+          console.error('Error fetching user from database:', error);
+        }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Send properties to the client
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.fullName = token.fullName as string;
+      }
+      return session;
+    },
   },
 };
 

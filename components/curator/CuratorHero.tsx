@@ -5,6 +5,7 @@ import Image from "next/image";
 import ShareButton from "../ShareButton";
 import { useImageLuminance } from "@/lib/hooks/useImageLuminance";
 import clsx from "clsx";
+import { safeSrc } from "@/lib/img";
 
 type Curator = {
   id: string;
@@ -41,7 +42,7 @@ export default function CuratorHero({ curator }: { curator: Curator }) {
       <div className="relative h-40 w-full bg-gradient-to-r from-gray-100 to-gray-50 md:h-56">
         {curator.bannerImage ? (
           <Image
-            src={curator.bannerImage}
+            src={safeSrc(curator.bannerImage)}
             alt={`${curator.storeName ?? "Curator"} banner`}
             fill
             priority={false}
@@ -60,7 +61,7 @@ export default function CuratorHero({ curator }: { curator: Curator }) {
           <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-gray-100 md:h-28 md:w-28">
             {curator.avatarUrl ? (
               <Image
-                src={curator.avatarUrl}
+                src={safeSrc(curator.avatarUrl)}
                 alt="Avatar"
                 width={112}
                 height={112}

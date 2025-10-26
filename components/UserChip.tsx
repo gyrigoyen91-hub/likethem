@@ -2,15 +2,34 @@
 import Link from "next/link";
 import Image from "next/image";
 import { signIn, signOut } from "next-auth/react";
-import { UserCircle, LogOut } from "lucide-react";
+import { UserCircle, LogOut, ChevronDown, BarChart3, ShoppingBag } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { safeSrc } from "@/lib/img";
 
 type User = {
   name?: string | null;
   image?: string | null;
   email?: string | null;
+  role?: string;
 };
 
 export default function UserChip({ user }: { user: User | null }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   if (!user) {
     return (
       <button
@@ -26,24 +45,66 @@ export default function UserChip({ user }: { user: User | null }) {
   const initial = fullName ? fullName[0].toUpperCase() : (user.email?.[0]?.toUpperCase() ?? "U");
 
   return (
-    <div className="flex items-center gap-2 max-w-[180px]">
-      <Link href="/account" className="flex items-center gap-2 group">
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 max-w-[180px] hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors"
+      >
         <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-sm">
           {user.image ? (
-            <Image src={user.image} alt={fullName || "User"} width={32} height={32} className="object-cover" />
+            <Image src={safeSrc(user.image)} alt={fullName || "User"} width={32} height={32} className="object-cover" />
           ) : (
-            <UserCircle className="size-5 text-gray-700 group-hover:text-black transition-colors" strokeWidth={1.5} />
+            <UserCircle className="size-5 text-gray-700" strokeWidth={1.5} />
           )}
         </div>
-        <span className="truncate text-sm text-gray-800 group-hover:text-black transition-colors">{fullName}</span>
-      </Link>
-      <button
-        onClick={() => signOut({ callbackUrl: "/" })}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black/10 transition-colors"
-        aria-label="Sign out"
-      >
-        <LogOut className="size-4 text-gray-600 hover:text-black transition-colors" strokeWidth={1.5} />
+        <span className="truncate text-sm text-gray-800">{fullName}</span>
+        <ChevronDown className="size-4 text-gray-600" strokeWidth={1.5} />
       </button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+          <Link
+            href="/account"
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            Account Settings
+          </Link>
+          
+          <Link
+            href="/orders"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            <ShoppingBag className="size-4" strokeWidth={1.5} />
+            Your Orders
+          </Link>
+          
+          {user.role === "CURATOR" && (
+            <Link
+              href="/dashboard/curator"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <BarChart3 className="size-4" strokeWidth={1.5} />
+              Curator Dashboard
+            </Link>
+          )}
+          
+          <hr className="my-1" />
+          
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              signOut({ callbackUrl: "/" });
+            }}
+            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <LogOut className="size-4" strokeWidth={1.5} />
+            Sign Out
+          </button>
+        </div>
+      )}
     </div>
   );
 }

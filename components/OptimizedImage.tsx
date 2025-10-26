@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import { getProductImageUrl, getCuratorImageUrl } from '@/lib/cloudinary'
+import { safeSrc } from '@/lib/img'
 
 interface OptimizedImageProps {
   src: string
@@ -108,7 +109,7 @@ export default function OptimizedImage({
 
   return (
     <Image
-      src={optimizedSrc}
+      src={safeSrc(optimizedSrc)}
       alt={alt}
       width={!fill ? width : undefined}
       height={!fill ? height : undefined}
