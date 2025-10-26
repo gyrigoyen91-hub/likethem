@@ -12,40 +12,42 @@ export const config = {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Early-allow list of *public* pages (home, explore/discover, curator/slug, product detail, access, sell apply, etc.)
+  // Allow all public routes without authentication
   const PUBLIC_PREFIXES = [
-    '/', '/discover', '/curator', '/product', '/access', '/sell', '/apply', '/api/access', '/api/health',
+    '/', '/discover', '/curator', '/product', '/access', '/sell', '/apply', 
+    '/api/access', '/api/health', '/auth', '/explore', '/favorites', '/search'
   ];
+  
   if (PUBLIC_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'))) {
     return NextResponse.next();
   }
 
-  // Health & static were already excluded by matcher, but double-guard:
-  if (pathname.startsWith('/api/health')) {
-    return NextResponse.next();
-  }
-
-  // ===== Protected routes that require authentication =====
+  // Only protect specific routes that require authentication
   const PROTECTED_PREFIXES = ['/dashboard', '/account', '/checkout', '/orders', '/api/cart', '/api/orders', '/api/curator'];
   
   if (PROTECTED_PREFIXES.some(p => pathname.startsWith(p + '/'))) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    
-    if (!token) {
-      return NextResponse.redirect(new URL('/auth/signin', req.url));
-    }
+    try {
+      const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+      
+      if (!token) {
+        return NextResponse.redirect(new URL('/auth/signin', req.url));
+      }
 
-    // Check for CURATOR role on dashboard routes
-    if (pathname.startsWith('/dashboard/curator') && token.role !== 'CURATOR') {
-      return NextResponse.redirect(new URL('/unauthorized', req.url));
-    }
+      // Check for CURATOR role on dashboard routes
+      if (pathname.startsWith('/dashboard/curator') && token.role !== 'CURATOR') {
+        return NextResponse.redirect(new URL('/unauthorized', req.url));
+      }
 
-    // Check for ADMIN role on admin routes
-    if (pathname.startsWith('/dashboard/admin') && token.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/unauthorized', req.url));
-    }
+      // Check for ADMIN role on admin routes
+      if (pathname.startsWith('/dashboard/admin') && token.role !== 'ADMIN') {
+        return NextResponse.redirect(new URL('/unauthorized', req.url));
+      }
 
-    return NextResponse.next();
+      return NextResponse.next();
+    } catch (error) {
+      console.error('Middleware error:', error);
+      return NextResponse.next();
+    }
   }
 
   // Default allow
