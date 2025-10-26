@@ -1,5 +1,6 @@
-import { CuratorCard } from "@/components/curators/Card";
-import { CuratorMasonry } from "@/components/curators/Masonry";
+import { CuratorCardMasonry } from "@/components/curators/CuratorCardMasonry";
+import { MasonryColumns } from "@/components/curators/MasonryColumns";
+import { isTallByIndex } from "@/lib/masonry";
 import Link from "next/link";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { mockCurators } from "@/lib/mock-data";
@@ -124,21 +125,23 @@ export default async function FeaturedCurators() {
 
       {/* ---- TOP ROW (crisp) ---- */}
       <div className="relative mx-auto mt-10 w-full max-w-[1200px] px-4 md:px-6">
-        <CuratorMasonry>
-          {firstRow.map((c) => (
-            <CuratorCard
+        <MasonryColumns>
+          {firstRow.map((c, i) => (
+            <CuratorCardMasonry
               key={c.id}
-              slug={c.slug}
-              name={c.name}
-              avatar={c.avatar}
-              city={c.city}
-              followers={c.followers}
-              hero={c.hero}
-              postUrl={c.postUrl}
-              isEditorsPick={c.isEditorsPick}
+              curator={{
+                id: c.id,
+                username: c.slug,
+                name: c.name,
+                avatar: c.avatar,
+                followers: c.followers,
+                coverImage: c.hero,
+                isEditorsPick: c.isEditorsPick,
+              }}
+              variant={isTallByIndex(i) ? "tall" : "normal"}
             />
           ))}
-        </CuratorMasonry>
+        </MasonryColumns>
 
         {/* ---- CTA sits ON the boundary with padding ---- */}
         <div className="pointer-events-auto absolute left-1/2 top-[100%] z-30 -translate-x-1/2 -translate-y-1/2 px-4 py-2">
@@ -180,21 +183,23 @@ export default async function FeaturedCurators() {
                   translate-y-[-8px]
                 "
               >
-                <CuratorMasonry>
-                  {secondRow.map((c) => (
-                    <CuratorCard
+                <MasonryColumns>
+                  {secondRow.map((c, i) => (
+                    <CuratorCardMasonry
                       key={c.id}
-                      slug={c.slug}
-                      name={c.name}
-                      avatar={c.avatar}
-                      city={c.city}
-                      followers={c.followers}
-                      hero={c.hero}
-                      postUrl={c.postUrl}
-                      isEditorsPick={c.isEditorsPick}
+                      curator={{
+                        id: c.id,
+                        username: c.slug,
+                        name: c.name,
+                        avatar: c.avatar,
+                        followers: c.followers,
+                        coverImage: c.hero,
+                        isEditorsPick: c.isEditorsPick,
+                      }}
+                      variant={isTallByIndex(i + 4) ? "tall" : "normal"}
                     />
                   ))}
-                </CuratorMasonry>
+                </MasonryColumns>
               </div>
             </div>
           </div>

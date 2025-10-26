@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useMemo, useRef, useEffect, useState } from "react";
 import { coverImageFor, Curator } from "@/lib/curators/fetchFeaturedWithFallback";
 import { cn } from "@/lib/utils";
-import { CuratorCard } from "@/components/curators/Card";
-import { CuratorMasonry } from "@/components/curators/Masonry";
+import { CuratorCardMasonry } from "@/components/curators/CuratorCardMasonry";
+import { MasonryColumns } from "@/components/curators/MasonryColumns";
+import { isTallByIndex } from "@/lib/masonry";
 
 
 type Props = {
@@ -67,21 +68,23 @@ export default function CuratorsSectionPeek({
           style={{ maxHeight: height }}
         >
           {/* Masonry grid — using shared components */}
-          <CuratorMasonry>
-            {curators.map((c) => (
-              <CuratorCard
+          <MasonryColumns>
+            {curators.map((c, i) => (
+              <CuratorCardMasonry
                 key={c.id}
-                slug={c.slug}
-                name={c.storeName || "Unknown Curator"}
-                avatar={c.avatar}
-                city={c.city}
-                followers={c.followersCount}
-                hero={coverImageFor(c)}
-                postUrl={c.feedPostUrl}
-                isEditorsPick={c.isEditorsPick ?? false}
+                curator={{
+                  id: c.id,
+                  username: c.slug,
+                  name: c.storeName || "Unknown Curator",
+                  avatar: c.avatar,
+                  followers: c.followersCount,
+                  coverImage: coverImageFor(c),
+                  isEditorsPick: c.isEditorsPick ?? false,
+                }}
+                variant={isTallByIndex(i) ? "tall" : "normal"}
               />
             ))}
-          </CuratorMasonry>
+          </MasonryColumns>
 
           {/* Peek overlay (blur + gradient) only if content overflows */}
           {showOverlay && (

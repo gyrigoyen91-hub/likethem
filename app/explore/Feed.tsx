@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CuratorCard } from "@/components/curators/Card";
-import { CuratorMasonry } from "@/components/curators/Masonry";
+import { CuratorCardMasonry } from "@/components/curators/CuratorCardMasonry";
+import { MasonryColumns } from "@/components/curators/MasonryColumns";
+import { isTallByIndex } from "@/lib/masonry";
 import { useSearchParams } from "next/navigation";
 
 type Item = {
@@ -105,21 +106,23 @@ export default function Feed() {
 
   return (
     <>
-      <CuratorMasonry className="mt-8">
-        {items.map((it) => (
-          <CuratorCard
+      <MasonryColumns className="mt-8">
+        {items.map((it, i) => (
+          <CuratorCardMasonry
             key={it.id}
-            slug={it.slug}
-            name={it.name}
-            avatar={it.avatar}
-            city={it.city}
-            followers={it.followers}
-            hero={it.hero}
-            postUrl={it.postUrl}
-            isEditorsPick={it.isEditorsPick}
+            curator={{
+              id: it.id,
+              username: it.slug,
+              name: it.name,
+              avatar: it.avatar,
+              followers: it.followers,
+              coverImage: it.hero,
+              isEditorsPick: it.isEditorsPick,
+            }}
+            variant={isTallByIndex(i) ? "tall" : "normal"}
           />
         ))}
-      </CuratorMasonry>
+      </MasonryColumns>
 
       {/* sentinel for infinite scroll */}
       <div ref={sentinel} className="h-12" />

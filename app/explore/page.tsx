@@ -7,12 +7,10 @@ export const revalidate = 0;
 function FeedSkeleton() {
   return (
     <div className="mt-8">
-      <div className="mx-auto w-full max-w-[1200px] px-4 md:px-6">
-        <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 [column-fill:_balance]">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="mb-4 break-inside-avoid h-[400px] w-full animate-pulse rounded-2xl bg-zinc-100" />
-          ))}
-        </div>
+      <div className="columns-1 sm:columns-2 lg:columns-3 gap-6">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="mb-6 break-inside-avoid h-[400px] w-full animate-pulse rounded-2xl bg-zinc-100" />
+        ))}
       </div>
     </div>
   );
