@@ -22,7 +22,7 @@ export function CuratorCard(props: Props) {
     props.followers ? Intl.NumberFormat("en", { notation: "compact" }).format(props.followers) : null;
 
   return (
-    <article className="mb-4 break-inside-avoid rounded-2xl border border-zinc-200/60 bg-white shadow-sm hover:shadow-md transition-shadow">
+    <article data-card-source="shared-curator-card" className="mb-4 break-inside-avoid rounded-2xl border border-zinc-200/60 bg-white shadow-sm hover:shadow-md transition-shadow">
       <div className="relative w-full overflow-hidden rounded-t-2xl">
         <Link href={`/curator/${props.slug}`} aria-label={`Open ${props.name}'s closet`}>
           {props.hero && imgOk ? (

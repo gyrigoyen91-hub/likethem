@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CuratorFeed } from "@/components/curators/CuratorFeed";
+import { CuratorCard } from "@/components/curators/Card";
+import { CuratorMasonry } from "@/components/curators/Masonry";
 import { useSearchParams } from "next/navigation";
 
 type Item = {
@@ -104,7 +105,21 @@ export default function Feed() {
 
   return (
     <>
-      <CuratorFeed curators={items} className="mt-8" />
+      <CuratorMasonry className="mt-8">
+        {items.map((it) => (
+          <CuratorCard
+            key={it.id}
+            slug={it.slug}
+            name={it.name}
+            avatar={it.avatar}
+            city={it.city}
+            followers={it.followers}
+            hero={it.hero}
+            postUrl={it.postUrl}
+            isEditorsPick={it.isEditorsPick}
+          />
+        ))}
+      </CuratorMasonry>
 
       {/* sentinel for infinite scroll */}
       <div ref={sentinel} className="h-12" />

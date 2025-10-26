@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useMemo, useRef, useEffect, useState } from "react";
 import { coverImageFor, Curator } from "@/lib/curators/fetchFeaturedWithFallback";
 import { cn } from "@/lib/utils";
-import CuratorFeedCard from "@/components/discover/CuratorFeedCard";
+import { CuratorCard } from "@/components/curators/Card";
+import { CuratorMasonry } from "@/components/curators/Masonry";
 
-// Simple CSS columns masonry (match Discover breakpoints)
-const COLS = "columns-1 gap-4 sm:columns-2 lg:columns-3 [column-fill:_balance]";
 
 type Props = {
   title?: string;
@@ -67,24 +66,22 @@ export default function CuratorsSectionPeek({
           className="relative overflow-hidden transition-[max-height] duration-300"
           style={{ maxHeight: height }}
         >
-          {/* Masonry grid — identical to Discover */}
-          <div className={cn(COLS)}>
+          {/* Masonry grid — using shared components */}
+          <CuratorMasonry>
             {curators.map((c) => (
-              <div key={c.id} className="mb-4 break-inside-avoid">
-                {/* Reuse the same card from Discover */}
-                <CuratorFeedCard
-                  slug={c.slug}
-                  name={c.storeName || "Unknown Curator"}
-                  avatar={c.avatar}
-                  city={c.city}
-                  followers={c.followersCount}
-                  hero={coverImageFor(c)}
-                  postUrl={c.feedPostUrl}
-                  isEditorsPick={c.isEditorsPick ?? false}
-                />
-              </div>
+              <CuratorCard
+                key={c.id}
+                slug={c.slug}
+                name={c.storeName || "Unknown Curator"}
+                avatar={c.avatar}
+                city={c.city}
+                followers={c.followersCount}
+                hero={coverImageFor(c)}
+                postUrl={c.feedPostUrl}
+                isEditorsPick={c.isEditorsPick ?? false}
+              />
             ))}
-          </div>
+          </CuratorMasonry>
 
           {/* Peek overlay (blur + gradient) only if content overflows */}
           {showOverlay && (

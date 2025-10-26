@@ -1,4 +1,3 @@
-import { CuratorCard } from "@/components/explore/CuratorCard";
 import Feed from "./Feed";
 import { Suspense } from "react";
 
