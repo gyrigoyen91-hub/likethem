@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
 
   // Early-allow list of *public* pages (home, explore/discover, curator/slug, product detail, access, sell apply, etc.)
   const PUBLIC_PREFIXES = [
-    '/', '/discover', '/curator', '/product', '/access', '/sell', '/apply', '/api/access',
+    '/', '/discover', '/curator', '/product', '/access', '/sell', '/apply', '/api/access', '/api/health',
   ];
   if (PUBLIC_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'))) {
     return NextResponse.next();
