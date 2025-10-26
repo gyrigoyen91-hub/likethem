@@ -4,6 +4,7 @@ import { type NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
+import NextAuth from "next-auth";
 
 const prisma = new PrismaClient();
 
@@ -78,4 +79,9 @@ export function requireRole(user: any, role: string) {
   if (user.role !== role) {
     throw new Error(`Access denied. Required role: ${role}`);
   }
+}
+
+// Helper for API routes to get session from request
+export async function auth(request: Request) {
+  return await getServerSession(authOptions);
 }

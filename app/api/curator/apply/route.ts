@@ -1,17 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getToken } from 'next-auth/jwt';
 import { prisma } from '@/lib/prisma';
 import { sendApplicationNotification } from '@/lib/mailer';
 import { createDecisionUrls } from '@/lib/approval-token';
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // Detailed logging for debugging
+    console.log('🔍 POST /api/curator/apply - Debug Info:');
+    console.log('Request URL:', request.url);
+    console.log('Request headers:', Object.fromEntries(request.headers.entries()));
+    console.log('Cookies:', request.headers.get('cookie'));
+    
+    // Check authentication using JWT token
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    console.log('JWT Token:', token);
+    console.log('Token user ID:', token?.id);
+    
+    if (!token?.id) {
+      console.log('❌ No token or user ID found');
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
+    
+    console.log('✅ Token found, proceeding with application...');
 
     // Parse request body
     const body = await request.json();
@@ -35,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting: Check if user has submitted an application in the last 10 minutes
     const existingApplication = await prisma.sellerApplication.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: token.id as string },
     });
 
     if (existingApplication) {
@@ -50,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     // Upsert application (idempotent)
     const application = await prisma.sellerApplication.upsert({
-      where: { userId: session.user.id },
+      where: { userId: token.id as string },
       update: {
         fullName: fullName.trim(),
         socialLinks: socialLinks?.trim() || null,
@@ -63,7 +74,7 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       },
       create: {
-        userId: session.user.id,
+        userId: token.id as string,
         fullName: fullName.trim(),
         socialLinks: socialLinks?.trim() || null,
         audienceBand: audienceBand?.trim() || null,
@@ -79,7 +90,7 @@ export async function POST(request: NextRequest) {
     try {
       await sendApplicationNotification({
         applicantName: application.fullName,
-        applicantEmail: session.user.email || '',
+        applicantEmail: token.email || '',
         socialLinks: application.socialLinks || undefined,
         audienceBand: application.audienceBand || undefined,
         reason: application.reason || undefined,
@@ -94,7 +105,7 @@ export async function POST(request: NextRequest) {
     // Log the application for debugging
     console.log('📝 Curator application submitted:', {
       applicationId: application.id,
-      userId: session.user.id,
+      userId: token.id,
       applicantName: application.fullName,
       status: application.status,
     });
