@@ -11,6 +11,7 @@ export function middleware(req: NextRequest) {
     "/api/health",
     "/api/auth", // CRITICAL: NextAuth routes must be public
     "/api/curator/decision", // Public endpoint for email links
+    "/auth/signin", // CRITICAL: allow sign-in page to avoid redirect loops
     "/_next",
     "/favicon.ico",
     "/images",
