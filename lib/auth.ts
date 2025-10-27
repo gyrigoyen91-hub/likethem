@@ -1,5 +1,6 @@
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { type NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -11,6 +12,7 @@ const prisma = new PrismaClient();
 export type UserRole = 'BUYER' | 'CURATOR' | 'ADMIN';
 
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   debug: process.env.NODE_ENV === 'development',
   providers: [
     GoogleProvider({
@@ -53,20 +55,20 @@ export const authOptions: NextAuthOptions = {
           
           if (dbUser) {
             console.log('✅ User found in database:', { id: dbUser.id, role: dbUser.role });
-            token.id = dbUser.id;
+            token.sub = dbUser.id;
             token.role = dbUser.role;
             token.fullName = dbUser.fullName || undefined;
           } else {
             console.log('⚠️ User not found in database, using default role');
             // Fallback: create a basic token without database lookup
-            token.id = user.email; // Use email as fallback ID
+            token.sub = user.email; // Use email as fallback ID
             token.role = 'BUYER'; // Default role
             token.fullName = user.name || user.email;
           }
         } catch (error) {
           console.error('❌ Error fetching user from database:', error);
           // Fallback: create a basic token without database lookup
-          token.id = user.email; // Use email as fallback ID
+          token.sub = user.email; // Use email as fallback ID
           token.role = 'BUYER'; // Default role
           token.fullName = user.name || user.email;
         }
@@ -75,8 +77,8 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       // Send properties to the client
-      if (token) {
-        session.user.id = token.id as string;
+      if (token && session.user) {
+        session.user.id = token.sub as string;
         session.user.role = token.role as string;
         session.user.fullName = token.fullName as string;
       }
