@@ -2,11 +2,14 @@
 
 import { signIn, getCsrfToken } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function SignInPage({ searchParams }: { searchParams: { callbackUrl?: string } }) {
+function SignInContent() {
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
-  const callbackUrl = searchParams?.callbackUrl ?? "/account";
+  const searchParams = useSearchParams();
+  const error = searchParams?.get("error");
+  const callbackUrl = searchParams?.get("callbackUrl") ?? "/account";
 
   useEffect(() => {
     getCsrfToken().then((token) => setCsrfToken(token || null));
@@ -15,6 +18,22 @@ export default function SignInPage({ searchParams }: { searchParams: { callbackU
   return (
     <main className="mx-auto max-w-md px-4 py-12">
       <h1 className="mb-6 text-2xl font-semibold">Sign in</h1>
+
+      {/* Error message */}
+      {error && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {error === "OAuthAccountNotLinked" 
+            ? "That email is already in use with a different sign-in method. Please sign in using that method or contact support."
+            : error === "CallbackRouteError"
+            ? "There was an error processing your sign-in. Please try again."
+            : error === "Configuration"
+            ? "Authentication configuration error. Please contact support."
+            : error === "AccessDenied"
+            ? "Access denied. Please contact support."
+            : `Error: ${error}`
+          }
+        </div>
+      )}
 
       {/* Google */}
       <button
@@ -60,5 +79,13 @@ export default function SignInPage({ searchParams }: { searchParams: { callbackU
         </Link>
       </div>
     </main>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-md px-4 py-12">Loading...</div>}>
+      <SignInContent />
+    </Suspense>
   );
 }

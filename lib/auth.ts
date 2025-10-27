@@ -13,11 +13,17 @@ export type UserRole = 'BUYER' | 'CURATOR' | 'ADMIN';
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-  debug: true, // TEMP: enable verbose logs for diagnosis
+  debug: true, // TEMP: enable verbose logs
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/signin", // show error page here so we can read ?error=...
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      // TEMP: allow linking by email to unblock (explain in comment)
+      // NOTE: enable temporarily to confirm the root cause; we'll replace with a safer flow later.
       allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
@@ -34,26 +40,22 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   session: { strategy: "jwt" },
-  pages: {
-    signIn: "/auth/signin", // our custom sign-in page
-  },
   logger: {
-    error(code, metadata) { console.error("[NextAuth][error]", code, metadata); },
-    warn(code) { console.warn("[NextAuth][warn]", code); },
-    debug(code, metadata) { console.log("[NextAuth][debug]", code, metadata); },
+    error(code: string, meta?: any) { console.error("[NextAuth][error]", code, meta); },
+    warn(code: string, meta?: any) { console.warn("[NextAuth][warn]", code, meta); },
+    debug(code: string, meta?: any) { console.log("[NextAuth][debug]", code, meta); },
   },
   callbacks: {
-    // Make signIn explicit — return true to allow
-    async signIn({ user, account, profile }) {
-      console.log("[NextAuth][signIn]", { hasUser: !!user, provider: account?.provider });
+    async signIn({ user, account, profile, email, credentials }) {
+      console.log("[NextAuth][signIn]", { provider: account?.provider, email: user?.email });
+      // With allowDangerousEmailAccountLinking enabled, just return true
       return true;
     },
-    // Ensure we propagate user.id (helps in JWT flow)
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account }) {
       if (user?.id) token.sub = user.id;
       return token;
     },
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       if (token?.sub) (session.user as any).id = token.sub;
       return session;
     },
