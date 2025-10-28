@@ -59,6 +59,15 @@ export const authOptions: NextAuthOptions = {
       if (token?.sub) (session.user as any).id = token.sub;
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      console.log("[NextAuth][redirect]", { url, baseUrl });
+      // If url is a relative path, make it absolute
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // If url is on the same origin, allow it
+      if (url.startsWith(baseUrl)) return url;
+      // Otherwise redirect to baseUrl
+      return baseUrl;
+    },
   },
 };
 

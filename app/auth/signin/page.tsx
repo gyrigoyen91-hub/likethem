@@ -2,14 +2,12 @@
 
 import { signIn, getCsrfToken } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-function SignInContent() {
+export default function SignInPage({ searchParams }: { searchParams: { callbackUrl?: string; error?: string } }) {
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
-  const searchParams = useSearchParams();
-  const error = searchParams?.get("error");
-  const callbackUrl = searchParams?.get("callbackUrl") ?? "/account";
+  const error = searchParams?.error;
+  const callbackUrl = searchParams?.callbackUrl ?? "/account";
 
   useEffect(() => {
     getCsrfToken().then((token) => setCsrfToken(token || null));
@@ -79,13 +77,5 @@ function SignInContent() {
         </Link>
       </div>
     </main>
-  );
-}
-
-export default function SignInPage() {
-  return (
-    <Suspense fallback={<div className="mx-auto max-w-md px-4 py-12">Loading...</div>}>
-      <SignInContent />
-    </Suspense>
   );
 }
