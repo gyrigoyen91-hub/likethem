@@ -1,0 +1,226 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.cdnfonts.com/css/canela');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-white text-carbon font-sans;
+  }
+
+  /* Global header spacing */
+  main {
+    @apply pt-16;
+  }
+
+  /* Product zoom cursor */
+  .cursor-zoom-in {
+    cursor: zoom-in;
+  }
+
+  .cursor-zoom-out {
+    cursor: zoom-out;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-carbon text-white px-8 py-3 font-medium tracking-wide transition-all duration-300 hover:bg-warm-gray;
+  }
+  
+  .btn-secondary {
+    @apply border border-carbon text-carbon px-8 py-3 font-medium tracking-wide transition-all duration-300 hover:bg-carbon hover:text-white;
+  }
+  
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .text-heading {
+    @apply font-serif text-4xl md:text-5xl lg:text-6xl font-light leading-tight;
+  }
+  
+  .text-subheading {
+    @apply font-sans text-lg md:text-xl text-warm-gray font-light;
+  }
+
+  /* New editorial-style components */
+  .btn-editorial {
+    @apply inline-block px-8 py-4 font-medium tracking-wider uppercase text-sm transition-all duration-200;
+  }
+
+  .btn-editorial-primary {
+    @apply bg-black text-white hover:bg-gray-800;
+  }
+
+  .btn-editorial-secondary {
+    @apply bg-white text-black border border-white hover:bg-gray-100;
+  }
+
+  .text-editorial-headline {
+    @apply font-serif text-5xl md:text-6xl lg:text-7xl font-light tracking-wide uppercase;
+  }
+
+  .text-editorial-subheadline {
+    @apply text-lg md:text-xl font-light;
+  }
+
+  /* Curator card styles */
+  .curator-card {
+    @apply group cursor-pointer;
+  }
+
+  .curator-image-container {
+    @apply relative overflow-hidden bg-stone;
+  }
+
+  .curator-image {
+    @apply w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105;
+  }
+
+  .curator-logo-overlay {
+    @apply absolute top-4 left-4 opacity-85;
+  }
+
+  .curator-hover-overlay {
+    @apply absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 ease-out flex items-end;
+  }
+
+  .curator-hover-content {
+    @apply w-full p-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out;
+  }
+
+  /* Airbnb-style navigation hover effects */
+  .nav-link {
+    @apply relative pb-1;
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-1/2 h-px w-0 bg-carbon transition-all duration-200 ease-in-out transform -translate-x-1/2;
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  /* Logo typography */
+  .logo-font {
+    font-family: 'Canela', 'Playfair Display', 'Editorial New', serif;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+  }
+
+  /* Header scroll behavior */
+  .header-scroll {
+    @apply shadow-sm;
+  }
+
+  /* Page content spacing */
+  .page-content {
+    @apply py-24;
+  }
+
+  /* Account pages specific spacing */
+  .account-page {
+    @apply min-h-screen bg-white py-24;
+  }
+
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Product zoom styles */
+  .product-image-zoom {
+    @apply relative overflow-hidden bg-gray-100 rounded-lg;
+  }
+
+  .product-image-zoom img {
+    @apply w-full h-full object-cover transition-transform duration-300 ease-out;
+  }
+
+  .product-image-zoom:hover img {
+    @apply scale-150;
+  }
+
+  /* Look view modal styles */
+  .look-view-modal {
+    @apply fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center;
+  }
+
+  .look-view-content {
+    @apply relative w-full h-full flex items-center justify-center p-4;
+  }
+
+  .look-view-image {
+    @apply max-w-full max-h-full object-contain;
+  }
+
+  .look-view-caption {
+    @apply absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6;
+  }
+
+  /* Zoom indicator styles */
+  .zoom-indicator {
+    @apply absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200;
+  }
+
+  .zoom-indicator-content {
+    @apply bg-black bg-opacity-50 text-white px-3 py-2 rounded-full flex items-center space-x-2;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Aspect ratio utilities */
+  .aspect-3-4 {
+    aspect-ratio: 3 / 4;
+  }
+  
+  .aspect-4-5 {
+    aspect-ratio: 4 / 5;
+  }
+
+  /* Zoom utilities */
+  .zoom-1-5 {
+    transform: scale(1.5);
+  }
+
+  .zoom-2 {
+    transform: scale(2);
+  }
+
+  .zoom-origin-center {
+    transform-origin: center;
+  }
+
+  .zoom-origin-cursor {
+    transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+  }
+} 
