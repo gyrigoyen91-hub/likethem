@@ -195,10 +195,12 @@ export const authOptions: NextAuthOptions = {
           accountId: account?.providerAccountId,
         });
 
-        // CRITICAL: Prevent silent account switching
-        // Check if email exists with a different provider
-        if (email && provider === 'google') {
-          const existingUser = await prisma.user.findUnique({
+        // CRITICAL: Prevent providerAccountId collisions across different emails
+        // Google may return the same providerAccountId for different emails
+        // We must enforce email-based uniqueness and prevent silent account switching
+        if (email && provider === 'google' && providerAccountId) {
+          // Step 1: Check if email already exists in database
+          const existingUserByEmail = await prisma.user.findUnique({
             where: { email },
             select: {
               id: true,
@@ -207,37 +209,116 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
-          if (existingUser) {
-            // User exists - check if provider matches
-            if (existingUser.provider && existingUser.provider !== 'google') {
+          // Step 2: Check if providerAccountId already exists in Account table
+          const existingAccount = await prisma.account.findUnique({
+            where: {
+              provider_providerAccountId: {
+                provider: 'google',
+                providerAccountId: providerAccountId,
+              },
+            },
+            select: {
+              id: true,
+              userId: true,
+              providerAccountId: true,
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                },
+              },
+            },
+          });
+
+          // Step 3: Decision logic
+          if (existingUserByEmail) {
+            // Email exists - check if it matches the account linked to providerAccountId
+            if (existingAccount && existingAccount.userId !== existingUserByEmail.id) {
+              // CRITICAL: providerAccountId is linked to a DIFFERENT user than the email
+              // This means Google returned same providerAccountId for different email
+              // BLOCK to prevent account collision
+              console.error(`[NextAuth][signIn][${correlationId}][BLOCKED]`, {
+                reason: 'PROVIDER_ACCOUNT_ID_COLLISION',
+                email,
+                profileEmail,
+                providerAccountId,
+                existingAccountUserId: existingAccount.userId,
+                existingAccountUserEmail: existingAccount.user.email,
+                existingUserByEmailId: existingUserByEmail.id,
+                message: 'providerAccountId already linked to different user with different email',
+              });
+              return false; // OAuthAccountNotLinked
+            }
+
+            // Email exists and matches (or no account exists yet)
+            if (existingUserByEmail.provider && existingUserByEmail.provider !== 'google') {
               // Email exists with a different provider - BLOCK sign-in
               console.error(`[NextAuth][signIn][${correlationId}][BLOCKED]`, {
                 reason: 'EMAIL_EXISTS_DIFFERENT_PROVIDER',
                 email,
-                existingProvider: existingUser.provider,
+                existingProvider: existingUserByEmail.provider,
                 attemptedProvider: 'google',
-                existingUserId: existingUser.id,
+                existingUserId: existingUserByEmail.id,
               });
-              
-              // Return false to block sign-in - NextAuth will redirect with error
-              return false;
+              return false; // OAuthAccountNotLinked
             }
-            
-            // User exists with same provider (or no provider set) - allow sign-in
-            // PrismaAdapter will handle the account linking
+
+            // Email exists with same provider (or no provider) - allow sign-in
             console.log(`[NextAuth][signIn][${correlationId}][ALLOWED]`, {
               reason: 'EMAIL_EXISTS_SAME_PROVIDER',
               email,
-              provider: existingUser.provider || 'google',
-              userId: existingUser.id,
+              profileEmail,
+              providerAccountId,
+              provider: existingUserByEmail.provider || 'google',
+              userId: existingUserByEmail.id,
             });
           } else {
-            // New user - allow sign-in
-            console.log(`[NextAuth][signIn][${correlationId}][ALLOWED]`, {
-              reason: 'NEW_USER',
-              email,
-              provider,
-            });
+            // Email does NOT exist - this is a new user
+            if (existingAccount) {
+              // CRITICAL: providerAccountId exists but email is different
+              // This means Google returned same providerAccountId for different email
+              // We MUST treat this as a NEW USER (different email = different identity)
+              // But we need to prevent PrismaAdapter from linking to existing account
+              // The solution: Delete the old account link so PrismaAdapter creates a new one
+              console.warn(`[NextAuth][signIn][${correlationId}][WARN]`, {
+                reason: 'PROVIDER_ACCOUNT_ID_EXISTS_DIFFERENT_EMAIL',
+                email,
+                profileEmail,
+                providerAccountId,
+                existingAccountUserId: existingAccount.userId,
+                existingAccountUserEmail: existingAccount.user.email,
+                action: 'Will delete old account link to allow new user creation',
+              });
+
+              // Delete the old account link to allow new user creation
+              await prisma.account.delete({
+                where: {
+                  provider_providerAccountId: {
+                    provider: 'google',
+                    providerAccountId: providerAccountId,
+                  },
+                },
+              });
+
+              console.log(`[NextAuth][signIn][${correlationId}][ALLOWED]`, {
+                reason: 'NEW_USER_DIFFERENT_EMAIL',
+                email,
+                profileEmail,
+                providerAccountId,
+                action: 'Deleted old account link, creating new user',
+              });
+            } else {
+              // New user, no account exists - allow sign-in
+              console.log(`[NextAuth][signIn][${correlationId}][ALLOWED]`, {
+                reason: 'NEW_USER',
+                email,
+                profileEmail,
+                providerAccountId,
+                provider,
+              });
+            }
           }
         }
 
