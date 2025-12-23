@@ -4,6 +4,14 @@
 
 This document explains how Prisma migrations work in production deployments and how to resolve common issues, particularly the P3009 error ("migrate found failed migrations").
 
+## ⚠️ IMPORTANT: Production Migration Policy
+
+**Migrations are NOT run automatically during Vercel builds.**
+
+- Vercel build script: `next build` (migrations removed)
+- Migrations must be run manually or via controlled CI job
+- This prevents P3009 errors from blocking production deployments
+
 ## Why P3009 Happens
 
 Prisma tracks migration state in the `_prisma_migrations` table. When a migration fails during deployment:
@@ -111,57 +119,51 @@ The `preBuildCheck.ts` script runs before migrations to:
 
 This makes debugging faster than waiting for `prisma migrate deploy` to fail.
 
-## Production Workflow Recommendations
+## Production Migration Workflow (Current Policy)
 
-### Option 1: Current Approach (Migrations in Build)
+**Migrations are run separately from application builds.**
 
-**Pros:**
-- Automatic migration application
-- No separate migration step needed
+### Workflow
 
-**Cons:**
-- Build fails if migrations fail
-- Requires database access during build
-- Can block deployments if migration state is inconsistent
+1. **Before deploying new code with migrations:**
+   ```bash
+   # Set production database URL
+   export DATABASE_URL="<production-database-url>"
+   
+   # Check status
+   npx prisma@6.12.0 migrate status
+   
+   # Apply migrations
+   npx prisma@6.12.0 migrate deploy
+   
+   # Verify success
+   npx prisma@6.12.0 migrate status
+   # Should show: "Database schema is up to date!"
+   ```
 
-**Best for:**
-- Small teams
-- Frequent deployments
-- Simple migration patterns
+2. **Deploy application:**
+   ```bash
+   git push origin main
+   ```
+   - Vercel builds without running migrations
+   - Build cannot be blocked by migration state issues
 
-### Option 2: Separate Migration Step (Recommended for Production)
+### Why This Approach?
 
-**Workflow:**
-1. Run migrations in a controlled environment (CI/CD job, manual script)
-2. Verify migrations succeed
-3. Deploy application (build only, no migrations)
+**Benefits:**
+- ✅ Builds never fail due to migration state (P3009)
+- ✅ Migrations can be tested and verified before deployment
+- ✅ Clear separation: schema changes vs. code changes
+- ✅ Easier to rollback if migration fails
 
-**Implementation:**
-```json
-{
-  "vercel-build": "next build"
-}
-```
+**Trade-offs:**
+- ⚠️ Requires manual migration step (or CI/CD job)
+- ⚠️ Must ensure migrations run before app deployment
 
-Migrations run separately:
-```bash
-# In CI/CD or manual process
-npx prisma migrate deploy
-```
-
-**Pros:**
-- Builds don't fail due to migration issues
-- Migrations can be tested before deployment
-- Clear separation of concerns
-
-**Cons:**
-- Requires additional step in deployment pipeline
-- Need to ensure migrations run before app deployment
-
-**Best for:**
-- Production environments
-- Critical deployments
-- Complex migration patterns
+**Best Practice:**
+- Run migrations in a controlled environment (local with prod DB, or CI/CD)
+- Verify migrations succeed before pushing code
+- Document migration steps in PR descriptions
 
 ## Environment Variables
 
