@@ -52,17 +52,17 @@ export default function SavedItems() {
     fetchWishlist()
   }, [])
 
-  const handleRemove = async (productId: string) => {
+  const handleRemove = async (productSlug: string) => {
     try {
-      const response = await fetch(`/api/products/${productId}/wishlist`, {
+      const response = await fetch(`/api/wishlist/products/by-slug/${productSlug}`, {
         method: 'DELETE',
         credentials: 'include',
       })
 
-          if (response.ok) {
-            // Remove from local state
-            setItems(prev => prev.filter(item => item.productSlug !== productSlug))
-          }
+      if (response.ok) {
+        // Remove from local state
+        setItems(prev => prev.filter(item => item.productSlug !== productSlug))
+      }
     } catch (err) {
       console.error('[SavedItems] Error removing item:', err)
     }
