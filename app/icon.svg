@@ -1,0 +1,12 @@
+<!-- app/icon.svg  — minimal, classy LT monogram -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background pill (soft corners) -->
+  <rect x="0" y="0" width="512" height="512" rx="96" fill="#FFFFFF"/>
+  <!-- Monogram "LT" (serif, bold-ish). Using generic serif to resemble our display font. -->
+  <g fill="#111111">
+    <!-- "L" -->
+    <path d="M170 140 h48 v228 h144 v44 H170z"/>
+    <!-- "T" -->
+    <path d="M320 140 h152 v44 H392 v228 h-48 V184 h-24z"/>
+  </g>
+</svg>
