@@ -51,8 +51,8 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: envVars.GOOGLE_CLIENT_ID!,
       clientSecret: envVars.GOOGLE_CLIENT_SECRET!,
-      // Allow linking accounts by email (users can sign in with Google even if they have an email account)
-      allowDangerousEmailAccountLinking: true,
+      // DO NOT allow linking accounts by email - prevents silent account switching
+      allowDangerousEmailAccountLinking: false,
     }),
     CredentialsProvider({
       name: "Email & Password",
@@ -173,13 +173,62 @@ export const authOptions: NextAuthOptions = {
       const correlationId = `signin-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
       try {
+        const provider = account?.provider ?? 'unknown';
+        const email = user?.email;
+
         console.log(`[NextAuth][signIn][${correlationId}]`, { 
-          provider: account?.provider, 
-          email: user?.email,
+          provider,
+          email,
           userId: user?.id,
         });
 
-        // PrismaAdapter handles user/account creation, but we can add defensive logging
+        // CRITICAL: Prevent silent account switching
+        // Check if email exists with a different provider
+        if (email && provider === 'google') {
+          const existingUser = await prisma.user.findUnique({
+            where: { email },
+            select: {
+              id: true,
+              email: true,
+              provider: true,
+            },
+          });
+
+          if (existingUser) {
+            // User exists - check if provider matches
+            if (existingUser.provider && existingUser.provider !== 'google') {
+              // Email exists with a different provider - BLOCK sign-in
+              console.error(`[NextAuth][signIn][${correlationId}][BLOCKED]`, {
+                reason: 'EMAIL_EXISTS_DIFFERENT_PROVIDER',
+                email,
+                existingProvider: existingUser.provider,
+                attemptedProvider: 'google',
+                existingUserId: existingUser.id,
+              });
+              
+              // Return false to block sign-in - NextAuth will redirect with error
+              return false;
+            }
+            
+            // User exists with same provider (or no provider set) - allow sign-in
+            // PrismaAdapter will handle the account linking
+            console.log(`[NextAuth][signIn][${correlationId}][ALLOWED]`, {
+              reason: 'EMAIL_EXISTS_SAME_PROVIDER',
+              email,
+              provider: existingUser.provider || 'google',
+              userId: existingUser.id,
+            });
+          } else {
+            // New user - allow sign-in
+            console.log(`[NextAuth][signIn][${correlationId}][ALLOWED]`, {
+              reason: 'NEW_USER',
+              email,
+              provider,
+            });
+          }
+        }
+
+        // PrismaAdapter handles user/account creation
         // If PrismaAdapter fails, it will throw and NextAuth will handle it
         return true;
       } catch (error) {
@@ -189,9 +238,8 @@ export const authOptions: NextAuthOptions = {
           provider: account?.provider,
           email: user?.email,
         });
-        // Don't block sign-in on errors - let PrismaAdapter handle it
-        // NextAuth will surface the error appropriately
-        throw error; // Re-throw so NextAuth can handle it
+        // Re-throw so NextAuth can handle it appropriately
+        throw error;
       }
     },
     async jwt({ token, user, account, trigger }) {

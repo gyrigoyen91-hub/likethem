@@ -21,7 +21,7 @@ export default function SignInPage({ searchParams }: { searchParams: { callbackU
       {error && (
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           {error === "OAuthAccountNotLinked" 
-            ? "That email is already in use with a different sign-in method. Please sign in using that method or contact support."
+            ? "This email is already associated with another account. Please log in using the original method."
             : error === "Callback" || error === "OAuthCallback" || error === "CallbackRouteError"
             ? "There was an error during Google sign-in (OAuth callback). This may be due to a configuration issue. Please try again or contact support if this persists."
             : error === "Configuration"
