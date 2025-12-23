@@ -51,6 +51,14 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: envVars.GOOGLE_CLIENT_ID!,
       clientSecret: envVars.GOOGLE_CLIENT_SECRET!,
+      // IMPORTANT: Always show account chooser to prevent silent account switching
+      authorization: {
+        params: {
+          prompt: "select_account",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
       // DO NOT allow linking accounts by email - prevents silent account switching
       allowDangerousEmailAccountLinking: false,
     }),
@@ -175,11 +183,16 @@ export const authOptions: NextAuthOptions = {
       try {
         const provider = account?.provider ?? 'unknown';
         const email = user?.email;
+        const profileEmail = (profile as any)?.email;
+        const providerAccountId = (account as any)?.providerAccountId;
 
         console.log(`[NextAuth][signIn][${correlationId}]`, { 
           provider,
           email,
+          profileEmail,
+          providerAccountId,
           userId: user?.id,
+          accountId: account?.providerAccountId,
         });
 
         // CRITICAL: Prevent silent account switching
@@ -232,13 +245,23 @@ export const authOptions: NextAuthOptions = {
         // If PrismaAdapter fails, it will throw and NextAuth will handle it
         return true;
       } catch (error) {
-        console.error(`[NextAuth][signIn][${correlationId}][ERROR]`, {
+        // Enhanced error logging for partner sign-in failures
+        const errorDetails = {
+          correlationId,
           error: error instanceof Error ? error.message : String(error),
+          errorName: error instanceof Error ? error.name : undefined,
           stack: error instanceof Error ? error.stack : undefined,
           provider: account?.provider,
           email: user?.email,
-        });
+          profileEmail: (profile as any)?.email,
+          providerAccountId: (account as any)?.providerAccountId,
+          userId: user?.id,
+        };
+        
+        console.error(`[NextAuth][signIn][${correlationId}][ERROR]`, errorDetails);
+        
         // Re-throw so NextAuth can handle it appropriately
+        // NextAuth will redirect to /auth/signin?error=<errorCode>
         throw error;
       }
     },

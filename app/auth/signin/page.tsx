@@ -22,21 +22,21 @@ export default function SignInPage({ searchParams }: { searchParams: { callbackU
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           {error === "OAuthAccountNotLinked" 
             ? "This email is already associated with another account. Please log in using the original method."
+            : error === "OAuthCreateAccount"
+            ? "We couldn't create your account. This usually means a duplicate email or a database constraint. Please contact support with error code: OAuthCreateAccount"
+            : error === "AccessDenied"
+            ? "Access denied. Please try again."
+            : error === "OAuthSignin"
+            ? "Error initiating Google sign-in. Please try again."
             : error === "Callback" || error === "OAuthCallback" || error === "CallbackRouteError"
             ? "There was an error during Google sign-in (OAuth callback). This may be due to a configuration issue. Please try again or contact support if this persists."
             : error === "Configuration"
             ? "Authentication configuration error. Please contact support."
-            : error === "AccessDenied"
-            ? "Access denied. Please contact support."
-            : error === "OAuthSignin"
-            ? "Error initiating Google sign-in. Please try again."
-            : error === "OAuthCreateAccount"
-            ? "Error creating account. Please try again or contact support."
             : error === "EmailCreateAccount"
             ? "Error creating account with email. Please try again."
             : error === "CredentialsSignin"
             ? "Invalid email or password. Please try again."
-            : `Sign-in error: ${error}. Please try again or contact support if this persists.`
+            : `Sign-in error: ${error}. Please contact support with this error code if the issue persists.`
           }
         </div>
       )}
