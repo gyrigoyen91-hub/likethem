@@ -9,6 +9,7 @@ import { safeSrc } from "@/lib/img";
 import { CuratorImageWithFallback } from "@/components/ImageWithFallback";
 import { useT } from "@/hooks/useT";
 import { Instagram, Music2, Youtube, Globe, ExternalLink } from "lucide-react";
+import FollowButton from "@/components/curator/FollowButton";
 
 type Curator = {
   id: string;
