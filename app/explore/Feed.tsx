@@ -21,6 +21,7 @@ type Item = {
   postUrl?: string | null;
   createdAt: string;
   isEditorsPick?: boolean;
+  isFollowing?: boolean;
 };
 
 type FeedResponse = {
@@ -140,6 +141,7 @@ export default function Feed() {
               city: it.city,
               country: it.country,
               styleTags: it.styleTags,
+              isFollowing: it.isFollowing,
             }}
             variant={isTallByIndex(i) ? "tall" : "normal"}
           />

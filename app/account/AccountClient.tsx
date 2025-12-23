@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronDown, ChevronUp, Edit, Plus, Trash2, User, MapPin, CreditCard, Palette } from 'lucide-react'
+import { ChevronDown, ChevronUp, Edit, Plus, Trash2, User, MapPin, CreditCard, Palette, Heart } from 'lucide-react'
+import SavedItems from '@/components/account/SavedItems'
 
 interface User {
   id: string
@@ -28,6 +29,7 @@ export default function AccountClient({ user, session }: AccountClientProps) {
 
   const sections = [
     { id: 'personal', title: 'Personal Details', icon: User },
+    { id: 'saved', title: 'Saved Items', icon: Heart },
     { id: 'shipping', title: 'Shipping Address', icon: MapPin },
     { id: 'payment', title: 'Payment Methods', icon: CreditCard },
     { id: 'style', title: 'Style Profile', icon: Palette }
@@ -101,6 +103,7 @@ export default function AccountClient({ user, session }: AccountClientProps) {
                         displayPhone={displayPhone}
                       />
                     )}
+                    {section.id === 'saved' && <SavedItems />}
                     {section.id === 'shipping' && <ShippingAddress displayName={displayName} />}
                     {section.id === 'payment' && <PaymentMethods />}
                     {section.id === 'style' && <StyleProfile />}

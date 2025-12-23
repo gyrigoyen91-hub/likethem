@@ -219,6 +219,10 @@ export default function CuratorHero({ curator }: { curator: Curator }) {
           </div>
 
           <div className="hidden md:flex items-center gap-2">
+            <FollowButton
+              curatorId={curator.id}
+              curatorSlug={curator.slug || ''}
+            />
             <ShareButton />
           </div>
         </div>

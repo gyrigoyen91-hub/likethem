@@ -18,6 +18,7 @@ type Props = {
     city?: string | null;
     country?: string | null;
     styleTags?: string[] | null;
+    isFollowing?: boolean;
   };
   variant?: "normal" | "tall";
 };
@@ -77,7 +78,14 @@ export function CuratorCardMasonry({ curator, variant = "normal" }: Props) {
             ) : null}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-medium text-sm truncate">{curator.name}</div>
+            <div className="flex items-center gap-2">
+              <div className="font-medium text-sm truncate">{curator.name}</div>
+              {curator.isFollowing && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-black/5 px-2 py-0.5 text-xs font-medium text-zinc-700 whitespace-nowrap">
+                  {t('curator.following')}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               {followersFmt && (
                 <span className="text-xs text-zinc-500">

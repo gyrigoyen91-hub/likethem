@@ -35,6 +35,8 @@ model User {
   cartItems     CartItem[]
   curatorProfile CuratorProfile?
   favorites     Favorite[]
+  wishlistItems WishlistItem[]
+  follows       Follow[]
   orders        Order[]         @relation("BuyerOrders")
   sellerApplication SellerApplication?
   accounts      Account[]
@@ -120,6 +122,7 @@ model CuratorProfile {
   user                          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders                        Order[]                @relation("CuratorOrders")
   products                      Product[]
+  followers                     Follow[]
 
   @@unique([slug], map: "curator_slug_unique")
   @@map("curator_profiles")
@@ -144,6 +147,7 @@ model Product {
   updatedAt     DateTime       @updatedAt
   cartItems     CartItem[]
   favorites     Favorite[]
+  wishlistItems WishlistItem[]
   orderItems    OrderItem[]
   images        ProductImage[]
   curator       CuratorProfile @relation(fields: [curatorId], references: [id], onDelete: Cascade)
@@ -295,4 +299,28 @@ model SellerApplication {
   user         User              @relation(fields: [userId], references: [id])
 
   @@map("seller_applications")
+}
+
+model Follow {
+  id        String         @id @default(cuid())
+  userId    String
+  curatorId String
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  curator   CuratorProfile @relation(fields: [curatorId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, curatorId])
+  @@map("follows")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("wishlist_items")
 }

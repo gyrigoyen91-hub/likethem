@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60 // Cache for 60 seconds
@@ -286,6 +288,25 @@ export async function GET(req: NextRequest) {
     const itemIds = items.map(c => c.id)
     const priceRanges = await getCuratorPriceRanges(itemIds)
 
+    // Get current user's follow status (if authenticated)
+    let userFollows: Set<string> = new Set()
+    try {
+      const session = await getServerSession(authOptions)
+      if (session?.user?.id) {
+        const follows = await (prisma as any).follow.findMany({
+          where: {
+            userId: session.user.id,
+            curatorId: { in: itemIds },
+          },
+          select: { curatorId: true },
+        })
+        userFollows = new Set(follows.map((f: any) => f.curatorId))
+      }
+    } catch (error) {
+      // Silently fail - follow status is optional
+      console.error('[discover] Error fetching follow status:', error)
+    }
+
     // Format response
     const result = items.map(curator => {
       // Get hero image (banner or latest product image)
@@ -327,6 +348,7 @@ export async function GET(req: NextRequest) {
         postUrl: null, // Not in current schema
         createdAt: curator.createdAt.toISOString(),
         isEditorsPick: curator.isEditorsPick,
+        isFollowing: userFollows.has(curator.id),
         priceRange: priceRange.min !== null && priceRange.max !== null
           ? { min: priceRange.min, max: priceRange.max }
           : null,

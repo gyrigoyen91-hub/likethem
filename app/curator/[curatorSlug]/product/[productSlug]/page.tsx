@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
+import WishlistButton from "@/components/product/WishlistButton";
 import { CheckCircle2 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/t";
@@ -428,10 +429,15 @@ export default async function ProductPage({ params }: Props) {
                 size={product.sizes?.length > 0 ? product.sizes[0] : undefined}
                 color={product.colors?.length > 0 ? product.colors[0] : undefined}
                 disabled={!product.isActive || product.stockQuantity <= 0}
-                className="rounded-xl bg-black px-5 py-3 text-sm text-white hover:bg-neutral-900 disabled:cursor-not-allowed disabled:bg-neutral-200"
+                className="flex-1 rounded-xl bg-black px-5 py-3 text-sm text-white hover:bg-neutral-900 disabled:cursor-not-allowed disabled:bg-neutral-200"
               >
                 {product.stockQuantity > 0 ? t(locale, 'product.addToCart') : t(locale, 'product.outOfStock')}
               </AddToCartButton>
+              <WishlistButton
+                productSlug={product.slug}
+                curatorSlug={product.curator.slug}
+                variant="icon-only"
+              />
             </div>
 
             {/* Shipping & Returns - Collapsible */}
