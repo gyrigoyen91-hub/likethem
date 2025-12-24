@@ -87,11 +87,11 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
-        if (!user || !user.password) {
+        if (!user || !user.passwordHash) {
           return null;
         }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!isPasswordValid) {
           return null;
         }
@@ -315,6 +315,58 @@ export const authOptions: NextAuthOptions = {
                 profileEmail,
                 providerAccountId,
                 provider,
+              });
+            }
+          }
+        }
+
+        // CRITICAL: Sync email from Google profile if it differs from DB
+        // This ensures user.email matches the Google account they selected
+        if (provider === 'google' && profileEmail && user?.id) {
+          const normalizedProfileEmail = profileEmail.toLowerCase().trim();
+          const normalizedDbEmail = email?.toLowerCase().trim();
+
+          if (normalizedProfileEmail && normalizedDbEmail && normalizedProfileEmail !== normalizedDbEmail) {
+            // Check if profileEmail is already used by another user
+            const emailOwner = await prisma.user.findUnique({
+              where: { email: normalizedProfileEmail },
+              select: { id: true },
+            });
+
+            if (emailOwner && emailOwner.id !== user.id) {
+              // Email already taken by another user - BLOCK sign-in
+              console.error(`[NextAuth][signIn][${correlationId}][BLOCKED]`, {
+                reason: 'PROFILE_EMAIL_ALREADY_TAKEN',
+                profileEmail: normalizedProfileEmail,
+                dbEmail: normalizedDbEmail,
+                userId: user.id,
+                emailOwnerId: emailOwner.id,
+                message: 'Google profile email is already used by another user',
+              });
+              return false; // OAuthAccountNotLinked
+            }
+
+            // Safe to update - email is not used by another user
+            try {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { email: normalizedProfileEmail },
+              });
+
+              console.log(`[NextAuth][signIn][${correlationId}][EMAIL_SYNCED]`, {
+                reason: 'EMAIL_UPDATED_FROM_PROFILE',
+                oldEmail: normalizedDbEmail,
+                newEmail: normalizedProfileEmail,
+                userId: user.id,
+                providerAccountId,
+              });
+            } catch (updateError) {
+              // Log error but don't block sign-in - email update is non-critical
+              console.error(`[NextAuth][signIn][${correlationId}][EMAIL_SYNC_ERROR]`, {
+                error: updateError instanceof Error ? updateError.message : String(updateError),
+                profileEmail: normalizedProfileEmail,
+                dbEmail: normalizedDbEmail,
+                userId: user.id,
               });
             }
           }

@@ -23,7 +23,7 @@ enum ApplicationStatus {
 model User {
   id            String          @id @default(cuid())
   email         String          @unique
-  password      String          // empty for OAuth users
+  passwordHash  String?         // optional; only for credentials users, null for OAuth users
   fullName      String?
   avatar        String?
   provider      String?         // e.g. "google" or "credentials"
