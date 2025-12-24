@@ -195,6 +195,12 @@ export const authOptions: NextAuthOptions = {
           accountId: account?.providerAccountId,
         });
 
+        // Store profileEmail in account object for jwt callback to access
+        // This ensures we can sync email even if PrismaAdapter uses a different email
+        if (provider === 'google' && profileEmail && account) {
+          (account as any).profileEmail = profileEmail;
+        }
+
         // CRITICAL: Prevent providerAccountId collisions across different emails
         // Google may return the same providerAccountId for different emails
         // We must enforce email-based uniqueness and prevent silent account switching
@@ -354,75 +360,14 @@ export const authOptions: NextAuthOptions = {
       // Initial sign-in - set user data from provider
       if (user?.id) {
         token.sub = user.id;
-        token.email = user.email;
+        // Use profile email if available (from Google), otherwise fallback to user.email
+        const profileEmail = (account as any)?.profileEmail || (user as any)?.email || user.email;
+        token.email = profileEmail;
         token.name = user.name;
         token.picture = user.image;
         // Set initial role from user object if available
         if (user.role) {
           token.role = user.role;
-        }
-      }
-
-      // CRITICAL: Sync email from Google profile if it differs from DB
-      // This ensures user.email matches the Google account they selected
-      // Must run in jwt callback because user.id is available after PrismaAdapter creates the user
-      if (userId && account?.provider === 'google' && user?.id) {
-        const profileEmail = (account as any)?.profileEmail || (user as any)?.email;
-        const normalizedProfileEmail = profileEmail?.toLowerCase().trim();
-        
-        if (normalizedProfileEmail) {
-          try {
-            const dbUser = await prisma.user.findUnique({
-              where: { id: userId },
-              select: {
-                email: true,
-              },
-            });
-
-            if (dbUser) {
-              const normalizedDbEmail = dbUser.email?.toLowerCase().trim();
-              
-              if (normalizedProfileEmail !== normalizedDbEmail) {
-                // Check if profileEmail is already used by another user
-                const emailOwner = await prisma.user.findUnique({
-                  where: { email: normalizedProfileEmail },
-                  select: { id: true },
-                });
-
-                if (emailOwner && emailOwner.id !== userId) {
-                  // Email already taken by another user - log warning but don't block
-                  console.warn(`[NextAuth][jwt][${correlationId}][EMAIL_SYNC_BLOCKED]`, {
-                    reason: 'PROFILE_EMAIL_ALREADY_TAKEN',
-                    profileEmail: normalizedProfileEmail,
-                    dbEmail: normalizedDbEmail,
-                    userId: userId,
-                    emailOwnerId: emailOwner.id,
-                    message: 'Google profile email is already used by another user, cannot sync',
-                  });
-                } else {
-                  // Safe to update - email is not used by another user
-                  await prisma.user.update({
-                    where: { id: userId },
-                    data: { email: normalizedProfileEmail },
-                  });
-
-                  console.log(`[NextAuth][jwt][${correlationId}][EMAIL_SYNCED]`, {
-                    reason: 'EMAIL_UPDATED_FROM_PROFILE',
-                    oldEmail: normalizedDbEmail,
-                    newEmail: normalizedProfileEmail,
-                    userId: userId,
-                  });
-                }
-              }
-            }
-          } catch (emailSyncError) {
-            // Log error but don't block - email update is non-critical
-            console.error(`[NextAuth][jwt][${correlationId}][EMAIL_SYNC_ERROR]`, {
-              error: emailSyncError instanceof Error ? emailSyncError.message : String(emailSyncError),
-              profileEmail: normalizedProfileEmail,
-              userId: userId,
-            });
-          }
         }
       }
 
@@ -434,7 +379,6 @@ export const authOptions: NextAuthOptions = {
           const dbUser = await prisma.user.findUnique({
             where: { id: userId },
             select: {
-              email: true,
               role: true,
               fullName: true,
               avatar: true,
