@@ -371,6 +371,70 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
+      // CRITICAL: Sync email from Google profile if it differs from DB
+      // This ensures user.email matches the Google account they selected
+      // Must run in jwt callback because user.id is available after PrismaAdapter creates the user
+      if (userId && account?.provider === 'google') {
+        // Get profileEmail from account (stored in signIn callback) or from user/token
+        const profileEmail = (account as any)?.profileEmail || user?.email || token.email;
+        const normalizedProfileEmail = profileEmail?.toLowerCase().trim();
+        
+        if (normalizedProfileEmail) {
+          try {
+            const dbUserForEmailSync = await prisma.user.findUnique({
+              where: { id: userId },
+              select: {
+                email: true,
+              },
+            });
+
+            if (dbUserForEmailSync) {
+              const normalizedDbEmail = dbUserForEmailSync.email?.toLowerCase().trim();
+              
+              if (normalizedProfileEmail !== normalizedDbEmail) {
+                // Check if profileEmail is already used by another user
+                const emailOwner = await prisma.user.findUnique({
+                  where: { email: normalizedProfileEmail },
+                  select: { id: true },
+                });
+
+                if (emailOwner && emailOwner.id !== userId) {
+                  // Email already taken by another user - log warning but don't block
+                  console.warn(`[NextAuth][jwt][${correlationId}][EMAIL_SYNC_BLOCKED]`, {
+                    reason: 'PROFILE_EMAIL_ALREADY_TAKEN',
+                    profileEmail: normalizedProfileEmail,
+                    dbEmail: normalizedDbEmail,
+                    userId: userId,
+                    emailOwnerId: emailOwner.id,
+                    message: 'Google profile email is already used by another user, cannot sync',
+                  });
+                } else {
+                  // Safe to update - email is not used by another user
+                  await prisma.user.update({
+                    where: { id: userId },
+                    data: { email: normalizedProfileEmail },
+                  });
+
+                  console.log(`[NextAuth][jwt][${correlationId}][EMAIL_SYNCED]`, {
+                    reason: 'EMAIL_UPDATED_FROM_PROFILE',
+                    oldEmail: normalizedDbEmail,
+                    newEmail: normalizedProfileEmail,
+                    userId: userId,
+                  });
+                }
+              }
+            }
+          } catch (emailSyncError) {
+            // Log error but don't block - email update is non-critical
+            console.error(`[NextAuth][jwt][${correlationId}][EMAIL_SYNC_ERROR]`, {
+              error: emailSyncError instanceof Error ? emailSyncError.message : String(emailSyncError),
+              profileEmail: normalizedProfileEmail,
+              userId: userId,
+            });
+          }
+        }
+      }
+
       // CRITICAL: Always refresh role and user data from DB if we have a user ID
       // This ensures role changes in DB are reflected immediately without requiring re-login
       // Do this on EVERY call, not just on update trigger
@@ -379,6 +443,7 @@ export const authOptions: NextAuthOptions = {
           const dbUser = await prisma.user.findUnique({
             where: { id: userId },
             select: {
+              email: true,
               role: true,
               fullName: true,
               avatar: true,
