@@ -184,7 +184,7 @@ export const authOptions: NextAuthOptions = {
         const provider = account?.provider ?? 'unknown';
         const email = user?.email;
         const profileEmail = (profile as any)?.email;
-        const providerAccountId = (account as any)?.providerAccountId;
+        const providerAccountId = String((account as any)?.providerAccountId ?? '');
 
         console.log(`[NextAuth][signIn][${correlationId}]`, { 
           provider,
@@ -221,8 +221,6 @@ export const authOptions: NextAuthOptions = {
               id: true,
               userId: true,
               providerAccountId: true,
-            },
-            include: {
               user: {
                 select: {
                   id: true,
