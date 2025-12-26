@@ -97,7 +97,7 @@ This script:
 
 ## Vercel Build Process
 
-### Current Setup
+### Current Setup (After Fix)
 
 Vercel runs:
 ```bash
@@ -105,65 +105,84 @@ npm run vercel-build
 ```
 
 Which executes:
-1. `tsx scripts/prisma/preBuildCheck.ts` - Pre-build migration check
-2. `prisma migrate deploy` - Apply pending migrations
-3. `next build` - Build Next.js application
+- `next build` - Build Next.js application only
 
-### Pre-Build Check
+**Migrations are NOT run during build.** This prevents P3009 errors from blocking deployments.
 
-The `preBuildCheck.ts` script runs before migrations to:
-- Detect failed migrations early
-- Provide clear error messages (instead of opaque P3009)
-- Suggest remediation steps
-- Exit with code 1 if failed migrations are found (blocks build)
+### Production Migration Procedure
 
-This makes debugging faster than waiting for `prisma migrate deploy` to fail.
+Migrations must be run manually before deploying:
 
-## Production Migration Workflow (Current Policy)
-
-**Migrations are run separately from application builds.**
-
-### Workflow
-
-1. **Before deploying new code with migrations:**
+1. **Check migration status:**
    ```bash
-   # Set production database URL
    export DATABASE_URL="<production-database-url>"
-   
-   # Check status
    npx prisma@6.12.0 migrate status
-   
-   # Apply migrations
-   npx prisma@6.12.0 migrate deploy
-   
-   # Verify success
-   npx prisma@6.12.0 migrate status
-   # Should show: "Database schema is up to date!"
    ```
 
-2. **Deploy application:**
+2. **Apply pending migrations:**
    ```bash
-   git push origin main
+   npx prisma@6.12.0 migrate deploy
    ```
-   - Vercel builds without running migrations
-   - Build cannot be blocked by migration state issues
 
-### Why This Approach?
+3. **Regenerate Prisma client:**
+   ```bash
+   npx prisma generate
+   ```
 
-**Benefits:**
-- ✅ Builds never fail due to migration state (P3009)
-- ✅ Migrations can be tested and verified before deployment
-- ✅ Clear separation: schema changes vs. code changes
-- ✅ Easier to rollback if migration fails
+4. **Deploy application:**
+   - Push to main (Vercel will build without running migrations)
 
-**Trade-offs:**
-- ⚠️ Requires manual migration step (or CI/CD job)
-- ⚠️ Must ensure migrations run before app deployment
+## Production Workflow Recommendations
 
-**Best Practice:**
-- Run migrations in a controlled environment (local with prod DB, or CI/CD)
-- Verify migrations succeed before pushing code
-- Document migration steps in PR descriptions
+### Option 1: Current Approach (Migrations in Build)
+
+**Pros:**
+- Automatic migration application
+- No separate migration step needed
+
+**Cons:**
+- Build fails if migrations fail
+- Requires database access during build
+- Can block deployments if migration state is inconsistent
+
+**Best for:**
+- Small teams
+- Frequent deployments
+- Simple migration patterns
+
+### Option 2: Separate Migration Step (Recommended for Production)
+
+**Workflow:**
+1. Run migrations in a controlled environment (CI/CD job, manual script)
+2. Verify migrations succeed
+3. Deploy application (build only, no migrations)
+
+**Implementation:**
+```json
+{
+  "vercel-build": "next build"
+}
+```
+
+Migrations run separately:
+```bash
+# In CI/CD or manual process
+npx prisma migrate deploy
+```
+
+**Pros:**
+- Builds don't fail due to migration issues
+- Migrations can be tested before deployment
+- Clear separation of concerns
+
+**Cons:**
+- Requires additional step in deployment pipeline
+- Need to ensure migrations run before app deployment
+
+**Best for:**
+- Production environments
+- Critical deployments
+- Complex migration patterns
 
 ## Environment Variables
 
@@ -177,15 +196,58 @@ Ensure these are set in Vercel Production:
 - Migrations require transaction support
 - `prisma migrate deploy` automatically uses `DIRECT_URL` if available
 
-## Troubleshooting
+## Fixing P3009 in Production
 
-### P3009 Error on Vercel
+### Step 1: Diagnose the Issue
 
-1. Check Vercel build logs for the exact migration name
-2. Run `npm run diagnose:migrations` locally (with production DB credentials)
-3. If tables exist, run `npm run resolve:follow-wishlist`
-4. If tables don't exist, review migration SQL and apply manually
-5. Retry deployment
+```bash
+# Set production database URL (same as Vercel uses)
+export DATABASE_URL="<copy-from-vercel-env-vars>"
+
+# Run diagnostic script
+npm run resolve:p3009:diagnose
+```
+
+This will show:
+- Migration state in `_prisma_migrations` table
+- Whether tables exist
+- Recommendation (mark as applied vs. apply SQL manually)
+
+### Step 2: Resolve Based on Diagnosis
+
+**If tables exist:**
+```bash
+npx prisma@6.12.0 migrate resolve --applied 20241222_add_follow_wishlist
+npx prisma@6.12.0 migrate status
+# Should show: "Database schema is up to date!"
+```
+
+**If tables don't exist:**
+1. Review migration SQL: `prisma/migrations/20241222_add_follow_wishlist/migration.sql`
+2. Apply SQL manually via database client
+3. Verify tables exist
+4. Then mark as applied (command above)
+
+### Step 3: Verify and Deploy
+
+```bash
+# Verify migration state is clean
+npx prisma@6.12.0 migrate status
+
+# Trigger deployment
+git commit --allow-empty -m "chore: trigger production deploy after migration resolve"
+git push origin main
+```
+
+### Quick Command Reference
+
+```bash
+# Print all commands needed
+npm run resolve:p3009:print
+
+# Diagnose current state
+npm run resolve:p3009:diagnose
+```
 
 ### Migration State Inconsistency
 
