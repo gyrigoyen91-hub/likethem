@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       const user = await tx.user.create({
         data: {
           email,
-          password: hashedPassword,
+          passwordHash: hashedPassword,
           fullName,
           role: role as 'BUYER' | 'CURATOR',
         }
