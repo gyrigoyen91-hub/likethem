@@ -47,6 +47,36 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin",
     error: "/auth/signin", // show error page here so we can read ?error=...
   },
+  events: {
+    async createUser({ user }) {
+      const correlationId = `createUser-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.log(`[NextAuth][events][createUser][${correlationId}]`, {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        action: 'PrismaAdapter created user',
+      });
+    },
+    async linkAccount({ account, user }) {
+      const correlationId = `linkAccount-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.log(`[NextAuth][events][linkAccount][${correlationId}]`, {
+        userId: user.id,
+        provider: account.provider,
+        providerAccountId: account.providerAccountId,
+        action: 'PrismaAdapter linked account',
+      });
+    },
+    async signIn({ user, account, profile, isNewUser }) {
+      const correlationId = `signInEvent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.log(`[NextAuth][events][signIn][${correlationId}]`, {
+        userId: user.id,
+        email: user.email,
+        provider: account?.provider,
+        isNewUser,
+        action: 'User signed in (after PrismaAdapter)',
+      });
+    },
+  },
   providers: [
     GoogleProvider({
       clientId: envVars.GOOGLE_CLIENT_ID!,
