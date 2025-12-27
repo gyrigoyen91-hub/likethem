@@ -42,7 +42,7 @@ const isSecure = process.env.NEXTAUTH_URL?.startsWith('https://') ?? false;
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   secret: envVars.NEXTAUTH_SECRET,
-  debug: !isProduction, // Only debug in development
+  debug: true, // Enable debug logging to capture real errors
   pages: {
     signIn: "/auth/signin",
     error: "/auth/signin", // show error page here so we can read ?error=...
@@ -75,7 +75,13 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-          include: {
+          select: {
+            id: true,
+            email: true,
+            passwordHash: true,
+            role: true,
+            fullName: true,
+            avatar: true,
             curatorProfile: {
               select: {
                 id: true,
