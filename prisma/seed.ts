@@ -20,9 +20,10 @@ async function main() {
     update: {},
     create: {
       email: 'curator@test.com',
-      password: hashedPassword,
+      passwordHash: hashedPassword,
       fullName: 'Marcus Chen',
       role: 'CURATOR',
+      provider: 'credentials',
     },
   })
 
