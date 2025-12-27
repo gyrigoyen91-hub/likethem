@@ -25,7 +25,13 @@ export const authOptions: AuthOptions = {
           where: {
             email: credentials.email
           },
-          include: {
+          select: {
+            id: true,
+            email: true,
+            passwordHash: true,
+            role: true,
+            fullName: true,
+            avatar: true,
             curatorProfile: {
               select: {
                 id: true,
@@ -37,11 +43,15 @@ export const authOptions: AuthOptions = {
           }
         })
 
-        if (!user) {
+        // If user has no passwordHash, they can't log in with credentials
+        if (!user || !user.passwordHash) {
           return null
         }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.passwordHash
+        )
 
         if (!isPasswordValid) {
           return null
@@ -90,7 +100,7 @@ export const authOptions: AuthOptions = {
           where: { email: user.email! },
           create: {
             email: user.email!,
-            password: '', // Empty password for OAuth users
+            passwordHash: null, // OAuth users don't have passwords
             fullName: mappedFullName,
             avatar: mappedAvatar,
             provider,
