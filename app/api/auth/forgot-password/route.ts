@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/mailer'
+import { sendMail } from '@/lib/mailer'
 import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
